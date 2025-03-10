@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <header class="navbar">
+        <h1>Capstone Project Management Portal</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/login">Login</a>
+            <a href="#">About</a>
+            <a href="/home" class="btn-primary">Get Started</a>
+        </nav>
+    </header>
+
+    <!-- Back Button -->
+    <div class="back-button">
+        <a href="javascript:history.back()">← Back</a>
+    </div>
+
+    <!-- Signup Form -->
+    <div class="page-container">
+        <h2>Sign Up</h2>
+        <div class="form-container">
+            <form action="/signup" method="POST">
+                <label for="email">Email:</label>
+                <input type="text" id="email" name="email" required>
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+
+                <button type="submit" class="btn">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Capstone Portal. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
