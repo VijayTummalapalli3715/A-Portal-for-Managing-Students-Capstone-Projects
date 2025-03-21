@@ -76,6 +76,11 @@ const About = () => {
           <p>📞 1-123-456-7890</p>
         </div>
 
+
+        <div className="bg-red-500 text-white p-4 rounded">
+  If you see this green box — Tailwind is working!
+</div>
+
         <div className="contact-form">
           <h2>Contact Us</h2>
           <form onSubmit={handleSubmit}>

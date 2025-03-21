@@ -30,6 +30,11 @@ const Home = () => {
         <button onClick={() => navigate(-1)}>← Back</button>
       </div>
 
+      <div className="bg-green-500 text-white p-4 rounded">
+  If you see this green box — Tailwind is working!
+</div>
+
+
       {/* Card Container */}
       <div className="card-container">
         <div className="card">

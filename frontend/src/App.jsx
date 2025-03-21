@@ -4,7 +4,7 @@ import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-
+import About from "./pages/About";
 import InstructorDashboard from "./pages/InstructorDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import ClientDashboard from "./pages/ClientDashboard";
@@ -19,6 +19,7 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/about" element={<About />} />
         <Route path="/instructor/dashboard" element={<InstructorDashboard />} />
         <Route path="/student/dashboard" element={<StudentDashboard />} />
         <Route path="/client/dashboard" element={<ClientDashboard />} /> 
