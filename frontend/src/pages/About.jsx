@@ -1,104 +1,67 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "./../styles.css"; // Ensure styles are imported correctly
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
-const About = () => {
-  const navigate = useNavigate();
+const teamMembers = [
+  {
+    name: "Sree Rama Vijay Tummalapalli",
+    role: "Full Stack Developer",
+    github: "https://github.com/VijayTummalapalli3715",
+    linkedin: "https://www.linkedin.com/in/sree-rama-vijay-tummalapalli-aabb91204/",
+    image: "https://via.placeholder.com/150",
+  },
+  {
+    name: "Sireesha Kuchimanchi",
+    role: "Frontend Developer",
+    github: "https://github.com/Sireesha2002",
+    linkedin: "https://www.linkedin.com/in/sireesha-kuchimanchi-0959a41b3/",
+    image: "https://via.placeholder.com/150",
+  },
+  {
+    name: "GopiKrishna Nathani",
+    role: "Backend Developer",
+    github: "https://github.com/gopikrishna2313",
+    linkedin: "https://www.linkedin.com/in/gopi-krishna-nathani44/",
+    image: "https://via.placeholder.com/150",
+  },
+];
 
-  // State for form input
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    message: "",
-  });
-
-  // Handle input changes
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Message Sent:", formData);
-    alert("Your message has been sent!");
-    setFormData({ firstName: "", lastName: "", email: "", message: "" });
-  };
-
+export default function About() {
   return (
-    <div>
-      {/* Navbar */}
-      <header className="navbar">
-        <h1>Capstone Project Management Portal</h1>
-        <nav>
-          <a href="/">Home</a>
-          <a href="/Login">Login</a>
-          <a href="/about">About</a>
-          <a href="/home" className="btn-primary">Get Started</a>
-        </nav>
-      </header>
-
-      {/* Back Button */}
-      <div className="back-button">
-        <button onClick={() => navigate(-1)}>← Back</button>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-6">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Meet Our Team</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {teamMembers.map((member, index) => (
+          <Card key={index} className="w-full max-w-sm shadow-lg">
+            <CardHeader className="flex items-center flex-col">
+              <Avatar className="w-24 h-24">
+                <AvatarImage src={member.image} alt={member.name} />
+                <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <CardTitle className="mt-2 text-lg">{member.name}</CardTitle>
+              <CardDescription>{member.role}</CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <a
+                href={member.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline"
+              >
+                GitHub
+              </a>{" "}
+              |{" "}
+              <a
+                href={member.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline"
+              >
+                LinkedIn
+              </a>
+            </CardContent>
+          </Card>
+        ))}
       </div>
-
-      {/* About Us Section */}
-      <section className="about-container">
-        <h2>Meet Our Team</h2>
-        <div className="team-members">
-          <div className="team-card">
-            <h3>Sree Rama Vijay Tummalapalli</h3>
-            <a href="https://github.com/VijayTummalapalli3715" target="_blank" rel="noopener noreferrer">GitHub Profile</a>
-            <a href="https://www.linkedin.com/in/sree-rama-vijay-tummalapalli-aabb91204/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-          </div>
-          <div className="team-card">
-            <h3>Sireesha Kuchimanchi</h3>
-            <a href="https://github.com/Sireesha2002" target="_blank" rel="noopener noreferrer">GitHub Profile</a>
-            <a href="https://www.linkedin.com/in/sireesha-kuchimanchi-0959a41b3/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-          </div>
-          <div className="team-card">
-            <h3>Gopi Krishna Nathani</h3>
-            <a href="https://github.com/gopikrishna2313" target="_blank" rel="noopener noreferrer">GitHub Profile</a>
-            <a href="https://www.linkedin.com/in/gopi-krishna-nathani44/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Us Section */}
-      <section className="contact-container">
-        <div className="contact-info">
-          <h2>Do you have a question?</h2>
-          <p>We’re here to help.</p>
-          <p>📍 100 Morrissey Blvd, Boston, MA 02125</p>
-          <p>📧 <a href="mailto:support@capstoneportal.com">support@capstoneportal.com</a></p>
-          <p>📞 1-123-456-7890</p>
-        </div>
-
-
-        <div className="bg-red-500 text-white p-4 rounded">
-  If you see this green box — Tailwind is working!
-</div>
-
-        <div className="contact-form">
-          <h2>Contact Us</h2>
-          <form onSubmit={handleSubmit}>
-            <input type="text" name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} required />
-            <input type="text" name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} required />
-            <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
-            <textarea name="message" placeholder="Message" value={formData.message} onChange={handleChange} required />
-            <button type="submit" className="btn">Send Message</button>
-          </form>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="footer">
-        <p>&copy; 2025 Capstone Portal. All rights reserved.</p>
-      </footer>
     </div>
   );
-};
-
-export default About;
+}

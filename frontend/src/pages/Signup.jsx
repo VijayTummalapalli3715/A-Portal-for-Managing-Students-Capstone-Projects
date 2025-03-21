@@ -1,98 +1,97 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./../styles.css"; // Ensure styles are correctly imported
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
-const Signup = () => {
+export default function Signup() {
   const navigate = useNavigate();
-
-  // State for input fields
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
-    role: "Student", // Default role
+    role: "student",
   });
 
-  // Handle input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/users/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      console.log("📩 Response from Backend:", data); // Debugging step
-
-      if (response.ok) {
-        alert("✅ Registration successful!");
-        navigate("/login"); // Redirect user after successful registration
-      } else {
-        alert("❌ Error: " + data.error);
-      }
-    } catch (error) {
-      console.error("❌ Network Error:", error);
-      alert("❌ Failed to connect to the server.");
-    }
+    // Simulate API call
+    console.log("User Registered:", formData);
+    navigate("/login");
   };
 
   return (
-    <div>
-      {/* Navbar */}
-      <header className="navbar">
-        <h1>Capstone Project Management Portal</h1>
-        <nav>
-          <a href="/">Home</a>
-          <a href="/login">Login</a>
-          <a href="/about">About</a>
-          <a href="/home" className="btn-primary">Get Started</a>
-        </nav>
-      </header>
-
-      {/* Signup Form */}
-      <div className="page-container">
-        <h2>Sign Up</h2>
-        <div className="form-container">
-          <form onSubmit={handleSubmit}>
-            <label htmlFor="name">Name:</label>
-            <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
-
-            <label htmlFor="email">Email:</label>
-            <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
-
-            <label htmlFor="password">Password:</label>
-            <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} required />
-
-            <label htmlFor="role">Role:</label>
-            <select id="role" name="role" value={formData.role} onChange={handleChange} required>
-              <option value="Student">Student</option>
-              <option value="Instructor">Instructor</option>
-              <option value="Client">Client</option>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+      <div className="w-full max-w-md p-6 bg-white shadow-md rounded-lg">
+        <h2 className="text-2xl font-bold text-gray-800 text-center">
+          Create an Account
+        </h2>
+        <form onSubmit={handleSubmit} className="mt-4">
+          <div className="mb-4">
+            <Label htmlFor="name">Full Name</Label>
+            <Input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Enter your full name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Create a password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="role">Select Role</Label>
+            <select
+              id="role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+            >
+              <option value="student">Student</option>
+              <option value="instructor">Instructor</option>
+              <option value="client">Client</option>
             </select>
-
-            <button type="submit" className="btn">Sign Up</button>
-          </form>
-        </div>
+          </div>
+          <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600">
+            Sign Up
+          </Button>
+        </form>
+        <p className="mt-4 text-center text-gray-600">
+          Already have an account?{" "}
+          <a href="/login" className="text-blue-500 hover:underline">
+            Login
+          </a>
+        </p>
       </div>
-
-      {/* Footer */}
-      <footer className="footer">
-        <p>&copy; 2025 Capstone Portal. All rights reserved.</p>
-      </footer>
     </div>
   );
-};
-
-export default Signup;
+}

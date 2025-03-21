@@ -1,89 +1,85 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./../styles.css"; // Ensure styles are correctly imported
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-const Login = () => {
+export default function Login() {
   const navigate = useNavigate();
-  
-  // State for input fields
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [role, setRole] = useState("student");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  // Handle input changes
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/users/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+    const response = await fetch("http://localhost:5000/auth", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password, role }),
+    });
 
-      const data = await response.json();
-      if (response.ok) {
-        alert("Login successful!");
-        navigate("/home"); // Redirect user after successful login
-      } else {
-        alert(data.message || "Login failed!");
-      }
-    } catch (error) {
-      console.error("Error logging in:", error);
-      alert("An error occurred. Please try again.");
+    const data = await response.text();
+
+    if (data.includes("Incorrect")) {
+      alert("Login failed. Please check your credentials.");
+    } else {
+      navigate(`/${role}/dashboard`);
     }
   };
 
   return (
-    <div>
-      {/* Navbar */}
-      <header className="navbar">
-        <h1>Capstone Project Management Portal</h1>
-        <nav>
-          <a href="/">Home</a>
-          <a href="/signup">Sign Up</a>
-          <a href="/about">About</a>
-          <a href="/home" className="btn-primary">Get Started</a>
-        </nav>
-      </header>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
 
-      {/* Back Button */}
-      <div className="back-button">
-        <button onClick={() => navigate(-1)}>← Back</button>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="role">Select Role</Label>
+            <select
+              id="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full border rounded-md px-3 py-2"
+              required
+            >
+              <option value="student">Student</option>
+              <option value="instructor">Instructor</option>
+              <option value="client">Client</option>
+            </select>
+          </div>
+
+          <Button type="submit" className="w-full">
+            Login
+          </Button>
+        </form>
       </div>
-
-      {/* Login Form */}
-      <div className="page-container">
-        <h2>Login</h2>
-        <div className="form-container">
-          <form onSubmit={handleSubmit}>
-            <label>Email:</label>
-            <input type="email" name="email" value={formData.email} onChange={handleChange} required />
-
-            <label>Password:</label>
-            <input type="password" name="password" value={formData.password} onChange={handleChange} required />
-
-            <button type="submit" className="btn">Login</button>
-          </form>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="footer">
-        <p>&copy; 2025 Capstone Portal. All rights reserved.</p>
-      </footer>
     </div>
   );
-};
-
-export default Login;
+}
