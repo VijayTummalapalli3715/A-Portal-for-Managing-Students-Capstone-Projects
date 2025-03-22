@@ -19,10 +19,29 @@ export default function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate API call
-    console.log("User Registered:", formData);
-    navigate("/login");
+  
+    try {
+      const response = await fetch("http://localhost:5006/api/users/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+  
+      const result = await response.json();
+      console.log(result);
+  
+      if (response.ok) {
+        alert("Registration Successful");
+        navigate("/login");
+      } else {
+        alert(result.error || "Registration Failed");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error occurred!");
+    }
   };
+  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
