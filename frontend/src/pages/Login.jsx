@@ -1,8 +1,12 @@
+// 
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/firebaseConfig";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -12,21 +16,20 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      const token = await auth.currentUser.getIdToken();
 
-    const response = await fetch("http://localhost:5006/api/users/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password, role }),
-    });
+      // Store the token (optional if you want to call protected APIs)
+      localStorage.setItem("token", token);
 
-    const data = await response.text();
+      // Optional: store role if needed
+      localStorage.setItem("role", role);
 
-    if (data.includes("Incorrect")) {
-      alert("Login failed. Please check your credentials.");
-    } else {
       navigate(`/${role}/dashboard`);
+    } catch (error) {
+      console.error("Login Error:", error);
+      alert("Login failed: " + error.message);
     }
   };
 
@@ -34,7 +37,6 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -47,7 +49,6 @@ export default function Login() {
               required
             />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <Input
@@ -59,7 +60,6 @@ export default function Login() {
               required
             />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="role">Select Role</Label>
             <select
@@ -74,7 +74,6 @@ export default function Login() {
               <option value="client">Client</option>
             </select>
           </div>
-
           <Button type="submit" className="w-full">
             Login
           </Button>
