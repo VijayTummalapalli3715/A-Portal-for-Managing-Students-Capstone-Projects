@@ -1,113 +1,124 @@
-import React from "react";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
+import Sidebar from "@/components/ui/sidebar"; 
+import { fetchClientDashboardData, fetchRecommendedProjects } from "@/lib/api";
 
 const ClientDashboard = () => {
-  return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gray-100">
-      {/* Sidebar */}
-      <aside className="w-full md:w-1/4 bg-blue-900 text-white min-h-screen p-6">
-        <h2 className="text-2xl font-bold mb-6">Client Dashboard</h2>
-        <nav className="flex flex-col space-y-3">
-          <Button variant="ghost" className="justify-start text-left">
-            Create Projects
-          </Button>
-          <Button variant="ghost" className="justify-start text-left">
-            View Student Groups
-          </Button>
-          <Button variant="ghost" className="justify-start text-left">
-            Approve/Reject Projects
-          </Button>
-        </nav>
-      </aside>
+  const [dashboardData, setDashboardData] = useState(null);
+  const [recommended, setRecommended] = useState([]);
 
-      {/* Main Content */}
+  useEffect(() => {
+    const loadDashboard = async () => {
+      try {
+        const { data } = await fetchClientDashboardData();
+        setDashboardData(data);
+      } catch (err) {
+        console.error("Dashboard fetch failed", err);
+      }
+    };
+
+    const loadRecommended = async () => {
+      try {
+        const { data } = await fetchRecommendedProjects();
+        setRecommended(data);
+      } catch (err) {
+        console.error("Recommendations fetch failed", err);
+      }
+    };
+
+    loadDashboard();
+    loadRecommended();
+  }, []);
+
+  if (!dashboardData) return <div className="p-8">Loading dashboard...</div>;
+
+  return (
+    <div className="min-h-screen flex bg-gray-100">
+      <Sidebar />
+
       <main className="flex-1 p-6">
+        {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">Dashboard</h1>
-          <Button variant="default">+ Create Project</Button>
+          <Button>+ Create Project</Button>
         </div>
 
-        {/* Tasks Section */}
+        {/* Tasks + Events */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg font-semibold">Tasks</CardTitle>
+              <CardTitle>Tasks</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="p-4 border rounded-md">
-                <span className="text-sm text-red-500 font-semibold">Required</span>
-                <p className="text-gray-600 mt-2">Create a project to get started.</p>
-                <Button variant="outline" className="mt-3">
-                  Create Project
-                </Button>
-              </div>
+              {dashboardData.tasks?.map((task, i) => (
+                <div key={i} className="mb-4">
+                  <span className="text-sm text-red-500 font-semibold">{task.label}</span>
+                  <p className="mt-2 text-gray-700">{task.description}</p>
+                  <Button className="mt-2">{task.buttonText}</Button>
+                </div>
+              ))}
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg font-semibold">Upcoming Events</CardTitle>
+              <CardTitle>Upcoming Events</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-500">You have no upcoming events.</p>
+              {dashboardData.events.length === 0 ? (
+                <p className="text-gray-500">You have no upcoming events.</p>
+              ) : (
+                dashboardData.events.map((event, i) => (
+                  <p key={i}>{event.name} - {event.date}</p>
+                ))
+              )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Projects Section */}
+        {/* My Projects */}
         <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4">My Projects</h2>
-          <Card className="p-6 text-center text-gray-500">
-            <p>You have no projects yet.</p>
-            <Button variant="default" className="mt-3">
-              Create Project
-            </Button>
-          </Card>
+          {dashboardData.projects.length === 0 ? (
+            <Card className="p-6 text-center text-gray-500">
+              <p>You have no projects yet.</p>
+              <Button className="mt-3">Create Project</Button>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {dashboardData.projects.map((project, i) => (
+                <Card key={i}>
+                  <CardHeader>
+                    <CardTitle>{project.name}</CardTitle>
+                    <CardDescription>{project.category}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p>{project.description}</p>
+                    <Button variant="outline" className="mt-2">Edit</Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Recommended Projects */}
+        {/* Recommended */}
         <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">Recommended Projects</h2>
+          <h2 className="text-xl font-semibold mb-4">Recommended Experiences</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="p-4">
-              <CardHeader>
-                <CardTitle>College of Wooster</CardTitle>
-                <CardDescription>Wooster, Ohio, United States</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Indigenous Histories, Power, and Social Justice</p>
-                <Button variant="outline" className="mt-3">
-                  View Details
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="p-4">
-              <CardHeader>
-                <CardTitle>UNC Charlotte</CardTitle>
-                <CardDescription>Charlotte, North Carolina, USA</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Business & Strategy Focus</p>
-                <Button variant="outline" className="mt-3">
-                  View Details
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="p-4">
-              <CardHeader>
-                <CardTitle>University of California, Merced</CardTitle>
-                <CardDescription>Merced, CA, USA</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Quantum Applications</p>
-                <Button variant="outline" className="mt-3">
-                  View Details
-                </Button>
-              </CardContent>
-            </Card>
+            {recommended.map((rec, i) => (
+              <Card key={i} className="p-4">
+                <CardHeader>
+                  <CardTitle>{rec.institution}</CardTitle>
+                  <CardDescription>{rec.location}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p>{rec.title}</p>
+                  <Button variant="outline" className="mt-3">View Details</Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </main>

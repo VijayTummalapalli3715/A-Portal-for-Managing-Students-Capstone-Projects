@@ -9,8 +9,9 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // Allows parsing of form submissions
-app.use(cors()); // Allow requests from frontend
+app.use(express.urlencoded({ extended: true }));
+
+// ✅ Fix CORS for frontend (port 5173)
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
 // Import database models
@@ -25,11 +26,15 @@ const projectRoutes = require("./routes/projectRoutes");
 const groupRoutes = require("./routes/groupRoutes");
 const preferenceRoutes = require("./routes/preferenceRoutes");
 
+// ✅ Import new route for client dashboard
+const clientRoutes = require("./routes/clientRoutes");
+
 // Define routes
 app.use("/api/users", userRoutes);
-app.use("/api/projects", projectRoutes);
+app.use("/api/projects", projectRoutes); // also includes /projects/recommended
 app.use("/api/groups", groupRoutes);
 app.use("/api/preferences", preferenceRoutes);
+app.use("/client", clientRoutes); // ✅ new client dashboard route
 
 // Default route
 app.get("/", (req, res) => {
@@ -48,7 +53,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server and create tables
-const PORT = process.env.PORT || 5006;
+const PORT = process.env.PORT || 5000;
 
 (async () => {
   try {
@@ -56,8 +61,9 @@ const PORT = process.env.PORT || 5006;
     await createProjectsTable();
     await createGroupsTable();
     await createPreferencesTable();
+
     console.log("✅ All tables are ready.");
-    
+
     app.listen(PORT, () => {
       console.log(`🚀 Server is running on port ${PORT}`);
     });

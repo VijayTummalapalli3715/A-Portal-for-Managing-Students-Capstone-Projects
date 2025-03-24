@@ -1,17 +1,35 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
+
+const sidebarLinks = [
+  { name: "My Dashboard", path: "/client/dashboard" },
+  { name: "My Projects", path: "/client/projects" },
+  { name: "My Teams", path: "/client/teams" },
+  { name: "My Achievements", path: "/client/achievements" },
+  { name: "My Bookmarks", path: "/client/bookmarks" },
+];
 
 const Sidebar = () => {
   return (
-    <div className="w-64 min-h-screen bg-gray-800 text-white p-4">
-      <h2 className="text-lg font-bold">Dashboard</h2>
-      <ul className="mt-4">
-        <li className="p-2 hover:bg-gray-700 cursor-pointer">My Dashboard</li>
-        <li className="p-2 hover:bg-gray-700 cursor-pointer">My Projects</li>
-        <li className="p-2 hover:bg-gray-700 cursor-pointer">My Teams</li>
-        <li className="p-2 hover:bg-gray-700 cursor-pointer">My Achievements</li>
-        <li className="p-2 hover:bg-gray-700 cursor-pointer">My Bookmarks</li>
+    <aside className="w-64 min-h-screen bg-[#0c1e4a] text-white p-6">
+      <h2 className="text-xl font-bold mb-6">Client Portal</h2>
+      <ul className="space-y-4">
+        {sidebarLinks.map((link, index) => (
+          <li key={index}>
+            <NavLink
+              to={link.path}
+              className={({ isActive }) =>
+                `block p-2 rounded-md hover:bg-[#1e3a8a] transition ${
+                  isActive ? "bg-[#1e3a8a] font-semibold" : ""
+                }`
+              }
+            >
+              {link.name}
+            </NavLink>
+          </li>
+        ))}
       </ul>
-    </div>
+    </aside>
   );
 };
 
