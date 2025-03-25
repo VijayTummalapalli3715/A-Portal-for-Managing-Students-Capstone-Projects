@@ -1,33 +1,5 @@
-// const jwt = require("jsonwebtoken");
-
-// const protect = (req, res, next) => {
-//   const authHeader = req.headers.authorization;
-
-//   // Check if authorization header exists and follows "Bearer <token>" format
-//   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-//     return res.status(401).json({ message: "Unauthorized: No token provided" });
-//   }
-
-//   const token = authHeader.split(" ")[1]; // Extract token
-
-//   try {
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//     req.user = decoded; // Attach user payload to request
-//     next();
-//   } catch (error) {
-//     console.error("JWT Verification Error:", error);
-
-//     if (error.name === "TokenExpiredError") {
-//       return res.status(403).json({ message: "Forbidden: Token has expired" });
-//     }
-
-//     return res.status(403).json({ message: "Forbidden: Invalid token" });
-//   }
-// };
-
-// module.exports = { protect };
-
-const fetch = require("node-fetch");
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const db = require("../db");
 require("dotenv").config();
 
 const verifyTokenWithFirebase = async (idToken) => {
@@ -44,7 +16,7 @@ const verifyTokenWithFirebase = async (idToken) => {
   }
 
   const data = await response.json();
-  return data.users[0]; // Contains user info: email, uid, etc.
+  return data.users[0];
 };
 
 const protect = async (req, res, next) => {
@@ -58,7 +30,19 @@ const protect = async (req, res, next) => {
 
   try {
     const firebaseUser = await verifyTokenWithFirebase(token);
-    req.user = firebaseUser; // You can access email, uid, etc.
+    const email = firebaseUser.email;
+
+    const [rows] = await db.execute("SELECT * FROM users WHERE email = ?", [email]);
+
+    if (!rows.length) {
+      return res.status(403).json({ message: "Forbidden: User not found in database" });
+    }
+
+    req.user = {
+      firebase: firebaseUser,
+      db: rows[0],
+    };
+
     next();
   } catch (error) {
     console.error("Token Verification Error:", error);
@@ -66,4 +50,7 @@ const protect = async (req, res, next) => {
   }
 };
 
-module.exports = { protect };
+module.exports = {
+  protect,
+  verifyTokenWithFirebase,
+};

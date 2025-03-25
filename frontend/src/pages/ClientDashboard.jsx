@@ -3,10 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import Sidebar from "@/components/ui/sidebar"; 
 import { fetchClientDashboardData, fetchRecommendedProjects } from "@/lib/api";
+import { useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "@/firebaseConfig"; // adjust path if needed
 
 const ClientDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [recommended, setRecommended] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -31,22 +35,33 @@ const ClientDashboard = () => {
     loadRecommended();
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("uid");
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
+
   if (!dashboardData) return <div className="p-8">Loading dashboard...</div>;
 
   return (
     <div className="min-h-screen flex bg-gray-100">
       <Sidebar />
-
       <main className="flex-1 p-6">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold">Dashboard</h1>
-          <Button>+ Create Project</Button>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">Client Dashboard</h1>
+          <Button variant="outline" onClick={handleLogout} className="border-gray-400">Logout</Button>
         </div>
 
         {/* Tasks + Events */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
+          <Card className="shadow-md">
             <CardHeader>
               <CardTitle>Tasks</CardTitle>
             </CardHeader>
@@ -61,7 +76,7 @@ const ClientDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-md">
             <CardHeader>
               <CardTitle>Upcoming Events</CardTitle>
             </CardHeader>
@@ -78,17 +93,20 @@ const ClientDashboard = () => {
         </div>
 
         {/* My Projects */}
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">My Projects</h2>
+        <div className="mt-10">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold">My Projects</h2>
+            <Button onClick={() => navigate("/create-project")} className="bg-blue-600 hover:bg-blue-700 text-white">+ Create Project</Button>
+          </div>
           {dashboardData.projects.length === 0 ? (
-            <Card className="p-6 text-center text-gray-500">
+            <Card className="p-6 text-center text-gray-500 shadow-sm">
               <p>You have no projects yet.</p>
               <Button className="mt-3">Create Project</Button>
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {dashboardData.projects.map((project, i) => (
-                <Card key={i}>
+                <Card key={i} className="shadow-md">
                   <CardHeader>
                     <CardTitle>{project.name}</CardTitle>
                     <CardDescription>{project.category}</CardDescription>
@@ -104,11 +122,11 @@ const ClientDashboard = () => {
         </div>
 
         {/* Recommended */}
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">Recommended Experiences</h2>
+        <div className="mt-10">
+          <h2 className="text-2xl font-semibold mb-4">Recommended Experiences</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {recommended.map((rec, i) => (
-              <Card key={i} className="p-4">
+            {(recommended || []).map((rec, i) => (
+              <Card key={i} className="p-4 shadow-md">
                 <CardHeader>
                   <CardTitle>{rec.institution}</CardTitle>
                   <CardDescription>{rec.location}</CardDescription>

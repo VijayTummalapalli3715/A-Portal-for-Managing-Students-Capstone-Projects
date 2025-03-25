@@ -47,63 +47,52 @@
 // module.exports = { registerUser, loginUser, getAllUsers };
 
 const db = require("../db");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const { verifyTokenWithFirebase } = require("../middleware/authMiddleware");
 
 const registerUser = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
   try {
-    console.log("Incoming Request Data:", req.body); // Debugging step
+    const firebaseUser = await verifyTokenWithFirebase(token);
+    const { email } = firebaseUser;
+    const { uid, name, role } = req.body;
 
-    const { name, email, password, role } = req.body;
-
-    // Check for missing fields
-    if (!name || !email || !password || !role) {
-      return res.status(400).json({ error: "All fields are required." });
+    if (!uid || !name || !role || !email) {
+      return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Hash the password before storing it
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const [existing] = await db.execute("SELECT * FROM users WHERE email = ?", [email]);
+    if (existing.length > 0) {
+      return res.status(200).json({ message: "User already exists" });
+    }
 
-    // Insert user into the database
-    const sql = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
-    await db.execute(sql, [name, email, hashedPassword, role]);
+    await db.execute(
+      "INSERT INTO users (name, email, firebase_uid, role) VALUES (?, ?, ?, ?)",
+      [name, email, uid, role]
+    );
 
-    res.status(201).json({ message: "User registered successfully!" });
-  } catch (error) {
-    console.error("Error Registering User:", error); // Log errors for debugging
-    res.status(500).json({ error: "Error registering user." });
+    res.status(201).json({ message: "User registered in DB" });
+  } catch (err) {
+    console.error("Register Error:", err);
+    res.status(403).json({ message: "Failed to verify token or save user" });
   }
 };
 
-const loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const [user] = await db.execute("SELECT * FROM users WHERE email = ?", [email]);
-
-    if (!user.length) {
-      return res.status(400).json({ error: "Invalid credentials" });
-    }
-
-    const isMatch = await bcrypt.compare(password, user[0].password);
-    if (!isMatch) {
-      return res.status(400).json({ error: "Invalid credentials" });
-    }
-
-    const token = jwt.sign({ id: user[0].id, role: user[0].role }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-    res.json({ token });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+const validateRole = async (req, res, next) => {
+  const role = req.headers["x-user-role"] || req.query.role;
+  if (!req.user || !req.user.db || !req.user.db.role) {
+    return res.status(403).json({ message: "Unauthorized: User role not found" });
   }
+  if (role && role !== req.user.db.role.toLowerCase()) {
+    return res.status(403).json({ message: `Access denied. Expected role '${req.user.db.role}', got '${role}'` });
+  }
+  next();
 };
 
-const getAllUsers = async (req, res) => {
-  try {
-    const [users] = await db.execute("SELECT * FROM users");
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: "Error fetching users" });
-  }
-};
+module.exports = { registerUser, validateRole };
 
-module.exports = {  getAllUsers };

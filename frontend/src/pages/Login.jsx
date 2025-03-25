@@ -1,5 +1,3 @@
-// 
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -17,14 +15,19 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const token = await auth.currentUser.getIdToken();
+      const uid = auth.currentUser.uid;
 
-      // Store the token (optional if you want to call protected APIs)
+      const userRole = localStorage.getItem(`role-${uid}`);
+      if (userRole && userRole !== role) {
+        alert(`Incorrect role. You signed up as '${userRole}', not '${role}'`);
+        return;
+      }
+
       localStorage.setItem("token", token);
-
-      // Optional: store role if needed
       localStorage.setItem("role", role);
+      localStorage.setItem("uid", uid);
 
       navigate(`/${role}/dashboard`);
     } catch (error) {

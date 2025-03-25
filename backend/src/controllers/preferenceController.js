@@ -3,19 +3,22 @@ const db = require("../db");
 // Add student preference (POST request)
 const addPreference = async (req, res) => {
   try {
-    const { student_id, project_id } = req.body;
+    const { project_id } = req.body;
+    const student = req.user.db;
 
-    if (!student_id || !project_id) {
-      return res.status(400).json({ error: "Student ID and Project ID are required." });
+    // ✅ Ensure project_id is sent
+    if (!project_id) {
+      return res.status(400).json({ error: "Project ID is required." });
     }
 
-    // Check if the user exists and is a student
-    const [userRows] = await db.execute("SELECT role FROM users WHERE id = ?", [student_id]);
-    if (!userRows.length || userRows[0].role !== "Student") {
+    // ✅ Check that the logged-in user is a Student
+    if (!student || student.role !== "Student") {
       return res.status(403).json({ error: "Only students can select preferences." });
     }
 
-    // Check if the preference already exists
+    const student_id = student.id;
+
+    // ✅ Check if preference already exists
     const [existingPreference] = await db.execute(
       "SELECT * FROM preferences WHERE student_id = ? AND project_id = ?",
       [student_id, project_id]
@@ -25,15 +28,21 @@ const addPreference = async (req, res) => {
       return res.status(400).json({ error: "You have already selected this project as a preference." });
     }
 
-    // Check how many preferences the student already has
-    const [rows] = await db.execute("SELECT COUNT(*) AS count FROM preferences WHERE student_id = ?", [student_id]);
+    // ✅ Check how many preferences the student already has
+    const [rows] = await db.execute(
+      "SELECT COUNT(*) AS count FROM preferences WHERE student_id = ?",
+      [student_id]
+    );
 
     if (rows[0].count >= 3) {
       return res.status(400).json({ error: "You can only select up to 3 preferred projects." });
     }
 
-    // Insert new preference
-    await db.execute("INSERT INTO preferences (student_id, project_id) VALUES (?, ?)", [student_id, project_id]);
+    // ✅ Insert new preference
+    await db.execute(
+      "INSERT INTO preferences (student_id, project_id) VALUES (?, ?)",
+      [student_id, project_id]
+    );
 
     res.status(201).json({ message: "Preference added successfully!" });
   } catch (error) {

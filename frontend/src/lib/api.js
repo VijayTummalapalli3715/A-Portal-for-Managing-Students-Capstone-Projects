@@ -1,11 +1,23 @@
 import axios from "axios";
 
-const API = axios.create({
-  baseURL: "http://localhost:5006", // your backend
-  withCredentials: true,
+const api = axios.create({
+  baseURL: "http://localhost:5006",
 });
 
-export const fetchClientDashboardData = () => API.get("/client/dashboard");
-export const fetchRecommendedProjects = () => API.get("/projects/recommended");
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+    config.headers["x-user-role"] = role;
+  }
+  return config;
+});
 
-export default API;
+export const fetchClientDashboardData = () => api.get("/client/dashboard");
+
+export const fetchRecommendedProjects = async () => {
+  const res = await fetch("http://localhost:5006/api/projects/recommended");
+  if (!res.ok) throw new Error("Failed to fetch recommended projects");
+  return res.json();
+};

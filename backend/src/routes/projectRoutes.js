@@ -1,14 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const { getAllProjects, addProject, getClientProjects } = require("../controllers/projectController");
+const { getRecommendedProjects } = require("../controllers/projectController");
+const { protect } = require("../middleware/authMiddleware");
 
-// Get all projects
+// ✅ Public route: Get all projects
 router.get("/", getAllProjects);
 
-// Get projects assigned to a specific client
+// ✅ Public route: Get latest 3 projects for dashboard
+router.get("/recommended", getRecommendedProjects);
+
+// ✅ Public route: Get projects for a specific client
 router.get("/client/:clientId", getClientProjects);
 
-// Add a new project
-router.post("/", addProject);
+// ✅ Protected route: Add project (only for authenticated users)
+router.post("/", protect, addProject);
 
 module.exports = router;
