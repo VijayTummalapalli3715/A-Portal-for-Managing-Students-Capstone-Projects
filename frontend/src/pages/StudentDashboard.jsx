@@ -8,7 +8,7 @@ const StudentDashboard = () => {
       {/* Sidebar */}
       <aside className="w-full md:w-1/4 bg-blue-900 text-white min-h-screen p-6">
         <h2 className="text-2xl font-bold mb-6">Student Dashboard</h2>
-        <nav className="flex flex-col space-y-3">
+        <nav className="flex flex-co space-y-3">
           <Button variant="ghost" className="justify-start text-left">
             View Projects
           </Button>
