@@ -54,7 +54,6 @@ export default function Signup() {
           role: formData.role,
         }),
       });
-
       alert("Registration Successful");
       navigate("/login");
     } catch (error) {

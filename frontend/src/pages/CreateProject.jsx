@@ -7,6 +7,7 @@ import { getAuth } from "firebase/auth";
 
 
 
+
 const CreateProject = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -63,7 +64,7 @@ const handleSubmit = async (e) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`, // ✅ Send token here
+        "Authorization": `Bearer ${token}`, // Send token here
       },
       body: JSON.stringify(projectData),
     });
@@ -83,7 +84,6 @@ const handleSubmit = async (e) => {
   }
 };
 
-  
 
   return (
     <div className="min-h-screen flex bg-gray-100">
@@ -243,7 +243,6 @@ const handleSubmit = async (e) => {
                   />
                 </div>
               </div>
-
               <Button type="submit" className="mt-4">
                 Submit Project
               </Button>

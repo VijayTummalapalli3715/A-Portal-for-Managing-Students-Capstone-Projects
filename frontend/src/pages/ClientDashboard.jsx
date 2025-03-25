@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebaseConfig"; // adjust path if needed
 
+
 const ClientDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [recommended, setRecommended] = useState([]);
@@ -144,4 +145,6 @@ const ClientDashboard = () => {
   );
 };
 
+
 export default ClientDashboard;
+

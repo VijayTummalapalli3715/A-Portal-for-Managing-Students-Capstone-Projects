@@ -28,7 +28,6 @@ export default function Login() {
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
       localStorage.setItem("uid", uid);
-
       navigate(`/${role}/dashboard`);
     } catch (error) {
       console.error("Login Error:", error);
