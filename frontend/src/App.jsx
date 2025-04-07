@@ -10,6 +10,9 @@ import StudentDashboard from "./pages/StudentDashboard";
 import ClientDashboard from "./pages/ClientDashboard";
 import CreateProject from "./pages/CreateProject";
 import Projects from "@/pages/Projects";
+import ViewProjects from "@/pages/ViewProjects";
+import ProvidePreferences from "@/pages/ProvidePreferences";
+import AssignedProjects from "./pages/AssignedProjects"; // ✅ Import added
 
 import "./styles.css";
 
@@ -25,7 +28,10 @@ function App() {
         <Route path="/create-project" element={<CreateProject />} />
         <Route path="/instructor/dashboard" element={<InstructorDashboard />} />
         <Route path="/student/dashboard" element={<StudentDashboard />} />
-        <Route path="/client/dashboard" element={<ClientDashboard />} /> 
+        <Route path="/student/view-projects" element={<ViewProjects />} />
+        <Route path="/student/provide-preferences" element={<ProvidePreferences />} />
+        <Route path="/student/assigned-projects" element={<AssignedProjects />} /> {/* ✅ New route added */}
+        <Route path="/client/dashboard" element={<ClientDashboard />} />
         <Route path="/client/projects" element={<Projects />} />
       </Routes>
     </Router>
