@@ -76,117 +76,146 @@ const CreateProject = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-b from-sky-100 via-white to-sky-100 flex">
       <Sidebar />
-      <main className="flex-1 p-6">
-        <Card className="max-w-3xl mx-auto">
-          <CardHeader>
-            <CardTitle>Create New Project</CardTitle>
+
+      <main className="flex-1 flex flex-col items-center justify-start py-20 px-8">
+        <Card className="w-full max-w-7xl shadow-xl rounded-2xl border border-blue-200 bg-white">
+          <CardHeader className="bg-blue-50 rounded-t-2xl p-6 border-b border-blue-200">
+            <CardTitle className="text-3xl font-bold text-blue-700 text-center">
+              ✨ Create New Project
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {[
-                { label: "Project Title", name: "title" },
-                { label: "Required Skills", name: "skills", placeholder: "e.g., React, Python, SQL" },
-                { label: "Main Category", name: "mainCategory" },
-                { label: "Sub Categories", name: "subCategories", placeholder: "Separate with commas" },
-                { label: "Total Hours Required", name: "totalHours", type: "number" },
-                { label: "Team Size", name: "teamSize", type: "number" },
-              ].map((field, i) => (
-                <div key={i}>
-                  <label className="block text-sm font-medium">{field.label}</label>
-                  <input
-                    type={field.type || "text"}
-                    name={field.name}
-                    value={form[field.name]}
-                    onChange={handleChange}
-                    placeholder={field.placeholder || ""}
-                    className="w-full mt-1 px-3 py-2 border rounded"
-                  />
-                </div>
-              ))}
 
+          <CardContent className="px-12 pt-10 pb-12 space-y-12">
+            <form id="createProjectForm" onSubmit={handleSubmit} className="space-y-12">
+
+              {/* Section 1: Project Basics */}
               <div>
-                <label className="block text-sm font-medium">Project Description</label>
-                <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  rows={4}
-                  className="w-full mt-1 px-3 py-2 border rounded"
-                />
+                <h3 className="text-xl font-semibold text-blue-600 mb-6">📌 Project Basics</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {[
+                    { label: "Project Title", name: "title" },
+                    { label: "Required Skills", name: "skills", placeholder: "e.g., React, Python, SQL" },
+                    { label: "Main Category", name: "mainCategory" },
+                    { label: "Sub Categories", name: "subCategories", placeholder: "Separate with commas" },
+                    { label: "Total Hours Required", name: "totalHours", type: "number" },
+                    { label: "Team Size", name: "teamSize", type: "number" },
+                  ].map((field, i) => (
+                    <div key={i}>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">{field.label}</label>
+                      <input
+                        type={field.type || "text"}
+                        name={field.name}
+                        value={form[field.name]}
+                        onChange={handleChange}
+                        placeholder={field.placeholder || ""}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
 
+              {/* Section 2: Description */}
               <div>
-                <label className="block text-sm font-medium">Expected Outcomes</label>
-                <textarea
-                  name="expectedOutcomes"
-                  value={form.expectedOutcomes}
-                  onChange={handleChange}
-                  rows={2}
-                  className="w-full mt-1 px-3 py-2 border rounded"
-                />
-              </div>
+                <h3 className="text-xl font-semibold text-blue-600 mb-6">📝 Description</h3>
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Project Description</label>
+                    <textarea
+                      name="description"
+                      value={form.description}
+                      onChange={handleChange}
+                      rows={4}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium">Project Flexibility</label>
-                  <select
-                    name="flexibility"
-                    value={form.flexibility}
-                    onChange={handleChange}
-                    className="w-full mt-1 px-3 py-2 border rounded"
-                  >
-                    <option value="">Select</option>
-                    <option value="Fixed">Fixed</option>
-                    <option value="Flexible">Flexible</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium">Difficulty Level</label>
-                  <select
-                    name="difficulty"
-                    value={form.difficulty}
-                    onChange={handleChange}
-                    className="w-full mt-1 px-3 py-2 border rounded"
-                  >
-                    <option value="">Select</option>
-                    <option value="Beginner">Beginner</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Advanced">Advanced</option>
-                  </select>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Expected Outcomes</label>
+                    <textarea
+                      name="expectedOutcomes"
+                      value={form.expectedOutcomes}
+                      onChange={handleChange}
+                      rows={3}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium">Start Date</label>
-                  <input
-                    type="date"
-                    name="startDate"
-                    value={form.startDate}
-                    onChange={handleChange}
-                    className="w-full mt-1 px-3 py-2 border rounded"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium">End Date</label>
-                  <input
-                    type="date"
-                    name="endDate"
-                    value={form.endDate}
-                    onChange={handleChange}
-                    className="w-full mt-1 px-3 py-2 border rounded"
-                  />
+              {/* Section 3: Settings */}
+              <div>
+                <h3 className="text-xl font-semibold text-blue-600 mb-6">⚙️ Settings & Timeline</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Project Flexibility</label>
+                    <select
+                      name="flexibility"
+                      value={form.flexibility}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select</option>
+                      <option value="Fixed">Fixed</option>
+                      <option value="Flexible">Flexible</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Difficulty Level</label>
+                    <select
+                      name="difficulty"
+                      value={form.difficulty}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select</option>
+                      <option value="Beginner">Beginner</option>
+                      <option value="Intermediate">Intermediate</option>
+                      <option value="Advanced">Advanced</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Start Date</label>
+                    <input
+                      type="date"
+                      name="startDate"
+                      value={form.startDate}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">End Date</label>
+                    <input
+                      type="date"
+                      name="endDate"
+                      value={form.endDate}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
                 </div>
               </div>
-              <Button type="submit" className="mt-4">
-                Submit Project
-              </Button>
+
+              {/* Spacer Before Submit */}
+              <div className="h-12" />
             </form>
           </CardContent>
         </Card>
+
+        {/* Submit Button OUTSIDE form */}
+        <div className="mt-10 flex justify-center">
+          <button
+            type="submit"
+            form="createProjectForm"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-10 py-3 text-lg font-semibold rounded-xl shadow-md hover:scale-105 hover:shadow-lg transition-transform duration-300 ease-in-out"
+          >
+            Submit Project
+          </button>
+        </div>
       </main>
     </div>
   );
