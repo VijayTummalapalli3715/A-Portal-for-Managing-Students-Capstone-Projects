@@ -1,19 +1,22 @@
+// backend/src/routes/projectRoutes.js
 const express = require("express");
-const router = express.Router();
-const { getAllProjects, addProject, getClientProjects } = require("../controllers/projectController");
-const { getRecommendedProjects } = require("../controllers/projectController");
+const {
+  getAllProjects,
+  addProject,
+  getClientProjects,
+  getRecommendedProjects
+} = require("../controllers/projectController");
+
 const { protect } = require("../middleware/authMiddleware");
 
-// ✅ Public route: Get all projects
-router.get("/", getAllProjects);
+const router = express.Router();
 
-// ✅ Public route: Get latest 3 projects for dashboard
+// Public routes (optional)
+router.get("/", getAllProjects);
 router.get("/recommended", getRecommendedProjects);
 
-// ✅ Public route: Get projects for a specific client
-router.get("/client/:clientId", getClientProjects);
-
-// ✅ Protected route: Add project (only for authenticated users)
-router.post("/", protect, addProject);
+// 🔒 Secure client-specific routes with protect middleware
+router.get("/client", protect, getClientProjects); // removed :clientId
+router.post("/", protect, addProject);             // add project needs auth
 
 module.exports = router;

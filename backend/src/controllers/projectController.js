@@ -12,7 +12,8 @@ const getAllProjects = async (req, res) => {
 
 // Get projects assigned to a specific client
 const getClientProjects = async (req, res) => {
-  const clientId = req.params.clientId;
+  //const clientId = req.params.clientId;
+  const clientId = req.user.db.id;
 
   try {
     const [projects] = await db.execute("SELECT * FROM projects WHERE client_id = ?", [clientId]);

@@ -5,9 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Sidebar from "@/components/ui/sidebar";
 import { getAuth } from "firebase/auth";
 
-
-
-
 const CreateProject = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -29,61 +26,54 @@ const CreateProject = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const projectData = {
+      title: form.title,
+      description: form.description,
+      skills_required: form.skills,
+      expected_outcomes: form.expectedOutcomes,
+      flexibility: form.flexibility,
+      difficulty: form.difficulty,
+      total_hours: form.totalHours,
+      main_category: form.mainCategory,
+      sub_categories: form.subCategories,
+      team_size: form.teamSize,
+      start_date: form.startDate,
+      end_date: form.endDate,
+      resources: "",
+    };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) {
+        alert("User not logged in.");
+        return;
+      }
 
-  const projectData = {
-    title: form.title,
-    description: form.description,
-    skills_required: form.skills,
-    expected_outcomes: form.expectedOutcomes,
-    flexibility: form.flexibility,
-    difficulty: form.difficulty,
-    total_hours: form.totalHours,
-    main_category: form.mainCategory,
-    sub_categories: form.subCategories,
-    team_size: form.teamSize,
-    start_date: form.startDate,
-    end_date: form.endDate,
-    resources: "",
+      const token = await user.getIdToken();
+
+      const response = await fetch("http://localhost:5006/api/projects", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(projectData),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert(result.message);
+        navigate("/client/dashboard");
+      } else {
+        alert("Failed to submit project.");
+      }
+    } catch (error) {
+      alert("An error occurred while submitting the project.");
+    }
   };
-
-  try {
-    const auth = getAuth();
-    const user = auth.currentUser;
-
-    if (!user) {
-      alert("User not logged in.");
-      return;
-    }
-
-    const token = await user.getIdToken();
-
-    const response = await fetch("http://localhost:5006/api/projects", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`, // Send token here
-      },
-      body: JSON.stringify(projectData),
-    });
-
-    const result = await response.json();
-
-    if (response.ok) {
-      alert(result.message);
-      navigate("/client/dashboard");
-    } else {
-      console.error("Error:", result.message);
-      alert("Failed to submit project.");
-    }
-  } catch (error) {
-    console.error("Submission error:", error);
-    alert("An error occurred while submitting the project.");
-  }
-};
-
 
   return (
     <div className="min-h-screen flex bg-gray-100">
@@ -95,17 +85,26 @@ const handleSubmit = async (e) => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium">Project Title</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={form.title}
-                  onChange={handleChange}
-                  required
-                  className="w-full mt-1 px-3 py-2 border rounded"
-                />
-              </div>
+              {[
+                { label: "Project Title", name: "title" },
+                { label: "Required Skills", name: "skills", placeholder: "e.g., React, Python, SQL" },
+                { label: "Main Category", name: "mainCategory" },
+                { label: "Sub Categories", name: "subCategories", placeholder: "Separate with commas" },
+                { label: "Total Hours Required", name: "totalHours", type: "number" },
+                { label: "Team Size", name: "teamSize", type: "number" },
+              ].map((field, i) => (
+                <div key={i}>
+                  <label className="block text-sm font-medium">{field.label}</label>
+                  <input
+                    type={field.type || "text"}
+                    name={field.name}
+                    value={form[field.name]}
+                    onChange={handleChange}
+                    placeholder={field.placeholder || ""}
+                    className="w-full mt-1 px-3 py-2 border rounded"
+                  />
+                </div>
+              ))}
 
               <div>
                 <label className="block text-sm font-medium">Project Description</label>
@@ -114,7 +113,6 @@ const handleSubmit = async (e) => {
                   value={form.description}
                   onChange={handleChange}
                   rows={4}
-                  required
                   className="w-full mt-1 px-3 py-2 border rounded"
                 />
               </div>
@@ -126,18 +124,6 @@ const handleSubmit = async (e) => {
                   value={form.expectedOutcomes}
                   onChange={handleChange}
                   rows={2}
-                  className="w-full mt-1 px-3 py-2 border rounded"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium">Required Skills</label>
-                <input
-                  type="text"
-                  name="skills"
-                  value={form.skills}
-                  onChange={handleChange}
-                  placeholder="e.g., React, Python, SQL"
                   className="w-full mt-1 px-3 py-2 border rounded"
                 />
               </div>
@@ -173,53 +159,6 @@ const handleSubmit = async (e) => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium">Total Hours Required</label>
-                <input
-                  type="number"
-                  name="totalHours"
-                  value={form.totalHours}
-                  onChange={handleChange}
-                  className="w-full mt-1 px-3 py-2 border rounded"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium">Main Category</label>
-                  <input
-                    type="text"
-                    name="mainCategory"
-                    value={form.mainCategory}
-                    onChange={handleChange}
-                    className="w-full mt-1 px-3 py-2 border rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium">Sub Categories</label>
-                  <input
-                    type="text"
-                    name="subCategories"
-                    value={form.subCategories}
-                    onChange={handleChange}
-                    placeholder="Separate with commas"
-                    className="w-full mt-1 px-3 py-2 border rounded"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium">Team Size</label>
-                <input
-                  type="number"
-                  name="teamSize"
-                  value={form.teamSize}
-                  onChange={handleChange}
-                  className="w-full mt-1 px-3 py-2 border rounded"
-                />
-              </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium">Start Date</label>
@@ -231,7 +170,6 @@ const handleSubmit = async (e) => {
                     className="w-full mt-1 px-3 py-2 border rounded"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium">End Date</label>
                   <input

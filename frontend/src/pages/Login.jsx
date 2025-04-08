@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/firebaseConfig";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -10,39 +12,69 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Login Data:", formData);
-  
-    // 🔒 Simulate successful login, then redirect based on role
-    if (formData.role === "Student") {
-      navigate("/student/dashboard");
-    } else if (formData.role === "Instructor") {
-      navigate("/instructor/dashboard");
-    } else if (formData.role === "Client") {
-      navigate("/client/dashboard");
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      const user = userCredential.user;
+      const token = await user.getIdToken();
+
+      // 🔐 Fetch database user info using token
+      const res = await fetch("http://localhost:5006/api/users/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch user info from backend");
+      }
+
+      const dbUser = await res.json();
+
+      // ✅ Store values for future use
+      localStorage.setItem("clientId", dbUser.id); // required for client dashboard
+      localStorage.setItem("token", token);
+      localStorage.setItem("uid", user.uid);
+      localStorage.setItem(`role-${user.uid}`, formData.role);
+
+      // 👇 Redirect based on role
+      if (formData.role === "Student") {
+        navigate("/student/dashboard");
+      } else if (formData.role === "Instructor") {
+        navigate("/instructor/dashboard");
+      } else if (formData.role === "Client") {
+        navigate("/client/dashboard");
+      }
+    } catch (error) {
+      console.error("Login failed:", error.message);
+      alert("Invalid credentials or server error. Please try again.");
     }
-  };  
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
-
       {/* Header */}
       <header className="fixed top-0 left-0 w-full bg-green-800 text-white shadow-md z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          {/* Back button and title */}
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               onClick={() => navigate(-1)}
               className="text-white text-sm font-semibold hover:text-yellow-300"
             >
-              ← 
+              ←
             </Button>
             <h1 className="text-xl font-bold">Capstone Project Management Portal</h1>
           </div>
 
-          {/* Navigation links */}
           <nav className="flex gap-6 text-sm font-semibold">
             <Button variant="ghost" onClick={() => navigate("/home")}>Home</Button>
             <Button variant="ghost" onClick={() => navigate("/login")}>Login</Button>

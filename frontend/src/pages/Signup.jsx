@@ -12,7 +12,7 @@ export default function Signup() {
     name: "",
     email: "",
     password: "",
-    role: "student",
+    role: "Student",
   });
 
   const handleChange = (e) => {
@@ -138,9 +138,9 @@ export default function Signup() {
                 onChange={handleChange}
                 className="w-full p-2 border rounded-md"
               >
-                <option value="student">Student</option>
-                <option value="instructor">Instructor</option>
-                <option value="client">Client</option>
+               <option value="Student">Student</option>
+              <option value="Instructor">Instructor</option>
+              <option value="Client">Client</option>
               </select>
             </div>
             <Button
