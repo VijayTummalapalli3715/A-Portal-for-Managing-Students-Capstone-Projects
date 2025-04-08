@@ -5,17 +5,21 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import About from "./pages/About";
-import InstructorDashboard from "./pages/InstructorDashboard";
-import StudentDashboard from "./pages/StudentDashboard";
-import ClientDashboard from "./pages/ClientDashboard";
-import CreateProject from "./pages/CreateProject";
-import Projects from "@/pages/Projects";
+import InstructorDashboard from "./instructer/InstructorDashboard";
+import StudentDashboard from "./student/StudentDashboard";
+import ClientDashboard from "./client/ClientDashboard";
+import CreateProject from "./client/CreateProject";
+import Projects from "./client/Projects";
 import ViewProjects from "@/pages/ViewProjects";
 import ProvidePreferences from "@/pages/ProvidePreferences";
 import AssignedProjects from "./pages/AssignedProjects";
+import { Toaster } from "sonner";
 
 import AuthProvider from "./context/AuthProvider"; // ✅ Wrap app in this
 import "./styles.css";
+import Teams from "./client/Teams";
+import Achievements from "./client/Achievements";
+import Bookmarks from "./client/Bookmarks";
 
 function App() {
   return (
@@ -35,8 +39,14 @@ function App() {
           <Route path="/student/assigned-projects" element={<AssignedProjects />} />
           <Route path="/client/dashboard" element={<ClientDashboard />} />
           <Route path="/client/projects" element={<Projects />} />
+          <Route path="/client/teams" element={<Teams />} />
+          <Route path="/client/achievements" element={<Achievements />} />
+          <Route path="/client/bookmarks" element={<Bookmarks />} />
+         
+          
         </Routes>
       </Router>
+      <Toaster richColors />
     </AuthProvider>
   );
 }
