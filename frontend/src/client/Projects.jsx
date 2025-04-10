@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import Sidebar from "@/components/ui/sidebar";
-import { Eye, Pencil, FolderOpen } from "lucide-react";
-import { motion } from "framer-motion";
+import { Eye, Pencil } from "lucide-react";
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
@@ -19,7 +18,6 @@ const Projects = () => {
         });
         if (!response.ok) throw new Error("Failed to fetch projects");
         const data = await response.json();
-        console.log("Fetched projects:", data);
         setProjects(data);
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -33,79 +31,81 @@ const Projects = () => {
   const rejected = projects.filter((p) => p.is_approved === false);
   const pending = projects.filter((p) => p.is_approved !== true && p.is_approved !== false);
 
-  const renderSection = (title, list) => (
-    <div className="mb-12">
-      <h2 className="text-2xl font-semibold text-gray-700 mb-4">{title}</h2>
-      {list.length === 0 ? (
-        <p className="text-muted-foreground pl-1">No {title.toLowerCase()}.</p>
-      ) : (
-        <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {list.map((project, i) => (
-            <motion.div
-              key={project.id || i}
-              layout
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.05 }}
-            >
-              <Card className="rounded-2xl shadow-md hover:shadow-xl transition">
-                <CardHeader>
-                  <CardTitle>{project.title}</CardTitle>
-                  <CardDescription>{project.main_category}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <p className="text-sm text-gray-600">{project.description}</p>
-                  <div className="flex gap-3 pt-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigate(`/edit-project/${project.id}`)}
-                    >
-                      <Pencil className="w-4 h-4 mr-1" /> Edit
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => navigate(`/project/${project.id}/proposals`)}
-                    >
-                      <Eye className="w-4 h-4 mr-1" /> View Proposals
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </motion.div>
-      )}
+  const renderCards = (list) => (
+    <div className="space-y-4">
+      {list.map((project) => (
+        <Card key={project.id} className="w-full shadow-sm border border-gray-300">
+          <CardContent className="p-4 space-y-2">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-semibold">{project.title}</h3>
+                <p className="text-sm text-gray-500">{project.main_category}</p>
+              </div>
+              <span className="text-xs font-medium text-gray-500">
+                {project.is_approved === true ? "Approved" : project.is_approved === false ? "Rejected" : "Pending"}
+              </span>
+            </div>
+            <p className="text-sm text-gray-700">{project.description}</p>
+            <div className="flex justify-end gap-3 pt-3">
+              <Button variant="outline" size="sm" onClick={() => navigate(`/edit-project/${project.id}`)}>
+                <Pencil className="w-4 h-4 mr-1" /> Edit
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => navigate(`/project/${project.id}/proposals`)}>
+                <Eye className="w-4 h-4 mr-1" /> View Proposals
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 
   return (
     <div className="min-h-screen flex bg-gray-50">
       <Sidebar />
-      <main className="flex-1 p-6 max-w-screen-xl mx-auto">
-        <div className="flex justify-between items-center mb-10">
-          <h1 className="text-4xl font-bold text-gray-800">My Projects</h1>
-          <Button
-            onClick={() => navigate("/create-project")}
-            className="bg-blue-600 text-white"
-          >
+      <main className="flex-1 px-6 py-8 max-w-screen-xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-blue-800">📁 My Projects</h1>
+            <p className="text-sm text-gray-500">Manage your proposals and track progress</p>
+          </div>
+          <Button onClick={() => navigate("/create-project")} className="bg-blue-600 text-white hover:bg-blue-700">
             + Create Project
           </Button>
         </div>
 
-        {projects.length === 0 ? (
-          <div className="text-center text-muted-foreground p-6 border rounded-xl">
-            <FolderOpen className="mx-auto h-8 w-8 mb-2" />
-            <p>You have no projects yet. Create your first project!</p>
+        {/* 3 Column Scrollable Boxes */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Approved */}
+          <div className="bg-green-50 border border-green-300 rounded-xl p-4 h-[500px] overflow-y-auto shadow-sm">
+            <h2 className="text-xl font-semibold text-green-800 mb-4">✅ Approved Projects</h2>
+            {approved.length === 0 ? (
+              <p className="text-sm text-gray-500 italic">No approved projects.</p>
+            ) : (
+              renderCards(approved)
+            )}
           </div>
-        ) : (
-          <>
-            {renderSection("Approved Projects", approved)}
-            {renderSection("Rejected Projects", rejected)}
-            {renderSection("Pending Projects", pending)}
-          </>
-        )}
+
+          {/* Rejected */}
+          <div className="bg-red-50 border border-red-300 rounded-xl p-4 h-[500px] overflow-y-auto shadow-sm">
+            <h2 className="text-xl font-semibold text-red-800 mb-4">❌ Rejected Projects</h2>
+            {rejected.length === 0 ? (
+              <p className="text-sm text-gray-500 italic">No rejected projects.</p>
+            ) : (
+              renderCards(rejected)
+            )}
+          </div>
+
+          {/* Pending */}
+          <div className="bg-white border border-gray-300 rounded-xl p-4 h-[500px] overflow-y-auto shadow-sm">
+            <h2 className="text-xl font-semibold text-yellow-600 mb-4">⏳ Pending Projects</h2>
+            {pending.length === 0 ? (
+              <p className="text-sm text-gray-500 italic">No pending projects.</p>
+            ) : (
+              renderCards(pending)
+            )}
+          </div>
+        </div>
       </main>
     </div>
   );
