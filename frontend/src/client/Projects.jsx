@@ -19,7 +19,7 @@ const Projects = () => {
         });
         if (!response.ok) throw new Error("Failed to fetch projects");
         const data = await response.json();
-        console.log("Fetched projects:", data); // Debugging
+        console.log("Fetched projects:", data);
         setProjects(data);
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -29,7 +29,6 @@ const Projects = () => {
     fetchProjects();
   }, []);
 
-  // Adjust this logic based on your actual field (status or is_approved)
   const approved = projects.filter((p) => p.is_approved === true);
   const rejected = projects.filter((p) => p.is_approved === false);
   const pending = projects.filter((p) => p.is_approved !== true && p.is_approved !== false);
@@ -43,7 +42,7 @@ const Projects = () => {
         <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {list.map((project, i) => (
             <motion.div
-              key={project.id}
+              key={project.id || i}
               layout
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -57,10 +56,18 @@ const Projects = () => {
                 <CardContent className="space-y-2">
                   <p className="text-sm text-gray-600">{project.description}</p>
                   <div className="flex gap-3 pt-2">
-                    <Button variant="ghost" size="sm" onClick={() => navigate(`/edit-project/${project.id}`)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(`/edit-project/${project.id}`)}
+                    >
                       <Pencil className="w-4 h-4 mr-1" /> Edit
                     </Button>
-                    <Button variant="secondary" size="sm" onClick={() => navigate(`/project/${project.id}/proposals`)}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => navigate(`/project/${project.id}/proposals`)}
+                    >
                       <Eye className="w-4 h-4 mr-1" /> View Proposals
                     </Button>
                   </div>
@@ -79,7 +86,10 @@ const Projects = () => {
       <main className="flex-1 p-6 max-w-screen-xl mx-auto">
         <div className="flex justify-between items-center mb-10">
           <h1 className="text-4xl font-bold text-gray-800">My Projects</h1>
-          <Button onClick={() => navigate("/create-project")} className="bg-blue-600 text-white">
+          <Button
+            onClick={() => navigate("/create-project")}
+            className="bg-blue-600 text-white"
+          >
             + Create Project
           </Button>
         </div>

@@ -1,22 +1,25 @@
-// backend/src/routes/projectRoutes.js
 const express = require("express");
 const {
   getAllProjects,
   addProject,
   getClientProjects,
-  getRecommendedProjects
+  getRecommendedProjects,
+  getProjectById,
+  updateProject
 } = require("../controllers/projectController");
 
 const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// Public routes (optional)
+// Public routes
 router.get("/", getAllProjects);
 router.get("/recommended", getRecommendedProjects);
 
-// 🔒 Secure client-specific routes with protect middleware
-router.get("/client", protect, getClientProjects); // removed :clientId
-router.post("/", protect, addProject);             // add project needs auth
+// Protected routes
+router.get("/client", protect, getClientProjects);
+router.post("/", protect, addProject);
+router.get("/:id", protect, getProjectById);     // must come after /client
+router.put("/:id", protect, updateProject);
 
 module.exports = router;

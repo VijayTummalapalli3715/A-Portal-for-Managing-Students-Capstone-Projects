@@ -42,6 +42,8 @@ function App() {
           <Route path="/client/teams" element={<Teams />} />
           <Route path="/client/achievements" element={<Achievements />} />
           <Route path="/client/bookmarks" element={<Bookmarks />} />
+          <Route path="/edit-project/:projectId" element={<CreateProject />} />
+
          
           
         </Routes>

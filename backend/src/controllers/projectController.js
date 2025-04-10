@@ -12,7 +12,6 @@ const getAllProjects = async (req, res) => {
 
 // Get projects assigned to a specific client
 const getClientProjects = async (req, res) => {
-  //const clientId = req.params.clientId;
   const clientId = req.user.db.id;
 
   try {
@@ -28,6 +27,7 @@ const getClientProjects = async (req, res) => {
   }
 };
 
+// Add a new project
 const addProject = async (req, res) => {
   try {
     const {
@@ -84,11 +84,79 @@ const addProject = async (req, res) => {
   }
 };
 
+// Get a single project by ID
+const getProjectById = async (req, res) => {
+  const projectId = req.params.id;
+  const clientId = req.user.db.id;
+
+  try {
+    const [rows] = await db.execute("SELECT * FROM projects WHERE id = ? AND client_id = ?", [projectId, clientId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    res.json(rows[0]);
+  } catch (error) {
+    console.error("Error fetching project:", error);
+    res.status(500).json({ message: "Error fetching project" });
+  }
+};
+
+// Update a project by ID
+const updateProject = async (req, res) => {
+  const projectId = req.params.id;
+  const clientId = req.user.db.id;
+
+  const {
+    title,
+    description,
+    skills_required,
+    expected_outcomes,
+    flexibility,
+    difficulty,
+    total_hours,
+    main_category,
+    sub_categories,
+    team_size,
+    start_date,
+    end_date,
+    resources,
+  } = req.body;
+
+  try {
+    const [existing] = await db.execute("SELECT * FROM projects WHERE id = ? AND client_id = ?", [projectId, clientId]);
+
+    if (existing.length === 0) {
+      return res.status(404).json({ message: "Project not found or unauthorized" });
+    }
+
+    await db.execute(
+      `UPDATE projects SET 
+        title = ?, description = ?, skills_required = ?, expected_outcomes = ?, 
+        flexibility = ?, difficulty = ?, total_hours = ?, main_category = ?, 
+        sub_categories = ?, team_size = ?, start_date = ?, end_date = ?, 
+        resources = ? 
+      WHERE id = ? AND client_id = ?`,
+      [
+        title, description, skills_required, expected_outcomes,
+        flexibility, difficulty, total_hours, main_category,
+        sub_categories, team_size, start_date, end_date,
+        resources, projectId, clientId
+      ]
+    );
+
+    res.json({ message: "Project updated successfully" });
+  } catch (error) {
+    console.error("Error updating project:", error);
+    res.status(500).json({ message: "Error updating project" });
+  }
+};
+
+// ✅ NEW: Get recommended projects
 const getRecommendedProjects = async (req, res) => {
   try {
-    const [rows] = await db.execute(
-      `SELECT * FROM projects ORDER BY id DESC LIMIT 3`
-    );
+    const [rows] = await db.execute("SELECT * FROM projects ORDER BY id DESC LIMIT 3");
     res.json(rows);
   } catch (error) {
     console.error("Error fetching recommended projects:", error);
@@ -96,4 +164,11 @@ const getRecommendedProjects = async (req, res) => {
   }
 };
 
-module.exports = {  getRecommendedProjects,getAllProjects, addProject, getClientProjects };
+module.exports = {
+  getAllProjects,
+  addProject,
+  getClientProjects,
+  getRecommendedProjects,
+  getProjectById,
+  updateProject
+};
