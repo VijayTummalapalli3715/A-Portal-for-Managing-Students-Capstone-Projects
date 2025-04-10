@@ -61,52 +61,88 @@ const Projects = () => {
   );
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
-      <Sidebar />
-      <main className="flex-1 px-6 py-8 max-w-screen-xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-blue-800">📁 My Projects</h1>
-            <p className="text-sm text-gray-500">Manage your proposals and track progress</p>
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      {/* Header */}
+      <header className="fixed top-0 left-0 w-full bg-green-800 text-white shadow-md z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate(-1)}
+              className="text-white text-sm font-semibold hover:text-yellow-300"
+            >
+              ←
+            </Button>
+            <h1 className="text-xl font-bold">Capstone Project Management Portal</h1>
           </div>
-          <Button onClick={() => navigate("/create-project")} className="bg-blue-600 text-white hover:bg-blue-700">
-            + Create Project
-          </Button>
+          <nav className="flex gap-6 text-sm font-semibold">
+            <Button variant="ghost" onClick={() => navigate("/home")}>Home</Button>
+            <Button variant="ghost" onClick={() => navigate("/login")}>Login</Button>
+            <Button variant="ghost" onClick={() => navigate("/about")}>About</Button>
+            <Button
+              className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-2 rounded-md"
+              onClick={() => navigate("/signup")}
+            >
+              Get Started
+            </Button>
+          </nav>
         </div>
+      </header>
 
-        {/* 3 Column Scrollable Boxes */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Approved */}
-          <div className="bg-green-50 border border-green-300 rounded-xl p-4 h-[500px] overflow-y-auto shadow-sm">
-            <h2 className="text-xl font-semibold text-green-800 mb-4">✅ Approved Projects</h2>
-            {approved.length === 0 ? (
-              <p className="text-sm text-gray-500 italic">No approved projects.</p>
-            ) : (
-              renderCards(approved)
-            )}
+      {/* Body */}
+      <div className="flex pt-24">
+        <Sidebar />
+        <main className="flex-1 !pt-10 py-8 max-w-screen-xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-blue-800">📁 My Projects</h1>
+              <p className="text-sm text-gray-500">Manage your proposals and track progress</p>
+            </div>
+            <Button onClick={() => navigate("/create-project")} className="bg-blue-600 text-white hover:bg-blue-700">
+              + Create Project
+            </Button>
           </div>
 
-          {/* Rejected */}
-          <div className="bg-red-50 border border-red-300 rounded-xl p-4 h-[500px] overflow-y-auto shadow-sm">
-            <h2 className="text-xl font-semibold text-red-800 mb-4">❌ Rejected Projects</h2>
-            {rejected.length === 0 ? (
-              <p className="text-sm text-gray-500 italic">No rejected projects.</p>
-            ) : (
-              renderCards(rejected)
-            )}
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Approved */}
+            <div className="bg-green-50 border border-green-300 rounded-xl p-4 h-[500px] overflow-y-auto shadow-sm">
+              <h2 className="text-xl font-semibold text-green-800 mb-4">✅ Approved Projects</h2>
+              {approved.length === 0 ? (
+                <p className="text-sm text-gray-500 italic">No approved projects.</p>
+              ) : (
+                renderCards(approved)
+              )}
+            </div>
 
-          {/* Pending */}
-          <div className="bg-white border border-gray-300 rounded-xl p-4 h-[500px] overflow-y-auto shadow-sm">
-            <h2 className="text-xl font-semibold text-yellow-600 mb-4">⏳ Pending Projects</h2>
-            {pending.length === 0 ? (
-              <p className="text-sm text-gray-500 italic">No pending projects.</p>
-            ) : (
-              renderCards(pending)
-            )}
+            {/* Rejected */}
+            <div className="bg-red-50 border border-red-300 rounded-xl p-4 h-[500px] overflow-y-auto shadow-sm">
+              <h2 className="text-xl font-semibold text-red-800 mb-4">❌ Rejected Projects</h2>
+              {rejected.length === 0 ? (
+                <p className="text-sm text-gray-500 italic">No rejected projects.</p>
+              ) : (
+                renderCards(rejected)
+              )}
+            </div>
+
+            {/* Pending */}
+            <div className="bg-white border border-gray-300 rounded-xl p-4 h-[500px] overflow-y-auto shadow-sm">
+              <h2 className="text-xl font-semibold text-yellow-600 mb-4">⏳ Pending Projects</h2>
+              {pending.length === 0 ? (
+                <p className="text-sm text-gray-500 italic">No pending projects.</p>
+              ) : (
+                renderCards(pending)
+              )}
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-green-800 text-white text-sm py-4 text-center mt-auto">
+        © 2025 Capstone Portal. All rights reserved. | Contact us:{" "}
+        <a href="mailto:support@capstoneportal.com" className="text-blue-300 underline">support@capstoneportal.com</a>{" "}
+        | Phone: 123-456-7890
+      </footer>
     </div>
   );
 };

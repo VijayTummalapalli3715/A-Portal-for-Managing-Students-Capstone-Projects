@@ -11,7 +11,7 @@ const sidebarLinks = [
 
 const Sidebar = () => {
   return (
-    <aside className="w-64 min-h-screen bg-[#0c1e4a] text-white p-6">
+    <aside className="w-64 bg-blue-900 text-white min-h-screen p-4 !pt-10">
       <h2 className="text-xl font-bold mb-6">Client Portal</h2>
       <ul className="space-y-4">
         {sidebarLinks.map((link, index) => (
