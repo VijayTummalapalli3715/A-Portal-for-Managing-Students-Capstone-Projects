@@ -1,8 +1,10 @@
+// ✅ Refactored Login.jsx with clean layout, animation, and consistent input styling
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
+import { motion } from "framer-motion";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,45 +16,26 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login Data:", formData);
-
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
-
+      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
       const token = await user.getIdToken();
 
-      // 🔐 Fetch database user info using token
       const res = await fetch("http://localhost:5006/api/users/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to fetch user info from backend");
-      }
-
+      if (!res.ok) throw new Error("Failed to fetch user info from backend");
       const dbUser = await res.json();
 
-      // ✅ Store values for future use
-      localStorage.setItem("clientId", dbUser.id); // required for client dashboard
+      localStorage.setItem("clientId", dbUser.id);
       localStorage.setItem("token", token);
       localStorage.setItem("uid", user.uid);
       localStorage.setItem(`role-${user.uid}`, formData.role);
 
-      // 👇 Redirect based on role
-      if (formData.role === "Student") {
-        navigate("/student/dashboard");
-      } else if (formData.role === "Instructor") {
-        navigate("/instructor/dashboard");
-      } else if (formData.role === "Client") {
-        navigate("/client/dashboard");
-      }
+      if (formData.role === "Student") navigate("/student/dashboard");
+      else if (formData.role === "Instructor") navigate("/instructor/dashboard");
+      else if (formData.role === "Client") navigate("/client/dashboard");
     } catch (error) {
       console.error("Login failed:", error.message);
       alert("Invalid credentials or server error. Please try again.");
@@ -61,7 +44,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
-      {/* Header */}
       <header className="fixed top-0 left-0 w-full bg-green-800 text-white shadow-md z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
@@ -74,7 +56,6 @@ const Login = () => {
             </Button>
             <h1 className="text-xl font-bold">Capstone Project Management Portal</h1>
           </div>
-
           <nav className="flex gap-6 text-sm font-semibold">
             <Button variant="ghost" onClick={() => navigate("/home")}>Home</Button>
             <Button variant="ghost" onClick={() => navigate("/login")}>Login</Button>
@@ -89,11 +70,13 @@ const Login = () => {
         </div>
       </header>
 
-      {/* Login Form */}
       <main className="flex flex-1 justify-center items-center pt-32 pb-12">
-        <form
+        <motion.form
           onSubmit={handleSubmit}
-          className="bg-white p-10 rounded-lg shadow-lg w-full max-w-sm h-auto"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="bg-white p-10 rounded-xl shadow-lg w-full max-w-sm h-auto"
         >
           <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
 
@@ -141,12 +124,11 @@ const Login = () => {
           >
             Login
           </Button>
-        </form>
+        </motion.form>
       </main>
 
-      {/* Footer */}
       <footer className="bg-green-800 text-white text-sm py-4 text-center mt-auto">
-        © 2025 Capstone Portal. All rights reserved. | Contact us:{" "}
+        © 2025 Capstone Portal. All rights reserved. | Contact us: {" "}
         <a href="mailto:support@capstoneportal.com" className="text-blue-300 underline">
           support@capstoneportal.com
         </a>{" "}

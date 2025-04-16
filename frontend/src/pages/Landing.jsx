@@ -1,6 +1,8 @@
+// ✅ Refactored Landing.jsx with centered layout, modern animation and spacing
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -35,23 +37,41 @@ const Landing = () => {
 
       {/* Main Content */}
       <main className="flex-grow flex flex-col justify-center items-center text-center px-4 pt-32 pb-10">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-          Welcome to A Portal for Managing Students Capstone Projects
-        </h2>
-        <p className="text-gray-600 mb-6 max-w-xl">
-          Your one-stop platform for connecting students, instructors, and clients.
-        </p>
-        <Button
-          className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-md"
-          onClick={() => navigate("/signup")}
+        <motion.h2
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-3xl md:text-4xl font-bold text-gray-800 mb-4"
         >
-          Get Started
-        </Button>
+          Welcome to A Portal for Managing Students Capstone Projects
+        </motion.h2>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="text-gray-600 mb-6 max-w-xl text-lg"
+        >
+          Your one-stop platform for connecting students, instructors, and clients.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          <Button
+            className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-md shadow-md"
+            onClick={() => navigate("/signup")}
+          >
+            Get Started
+          </Button>
+        </motion.div>
       </main>
 
       {/* Footer */}
       <footer className="bg-green-800 text-white text-sm py-4 text-center">
-        © 2025 Capstone Portal. All rights reserved. | Contact us:{" "}
+        © 2025 Capstone Portal. All rights reserved. | Contact us: {" "}
         <a href="mailto:support@capstoneportal.com" className="text-blue-300 underline">
           support@capstoneportal.com
         </a>{" "}
@@ -62,4 +82,3 @@ const Landing = () => {
 };
 
 export default Landing;
-        

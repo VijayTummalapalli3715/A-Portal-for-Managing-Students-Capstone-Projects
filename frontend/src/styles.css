@@ -1,176 +1,65 @@
 @import "tailwindcss";
-/* Reset & Base Styling */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+  line-height: 1.6;
 }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f7fa;
-    color: #333;
-    line-height: 1.6;
-}
-
-/* Navbar Styling */
+/* Optional navbar for non-Tailwind pages */
 .navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: linear-gradient(to right, #006400, #228B22);
-    padding: 20px 40px;
-    color: white;
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 1000;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.navbar h1 {
-    font-size: 1.8em;
-    font-weight: bold;
-}
-
-.navbar nav {
-    display: flex;
-    gap: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to right, #006400, #228B22);
+  padding: 20px 40px;
+  color: white;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .navbar nav a {
-    color: white;
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.3s;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s;
 }
 
 .navbar nav a:hover {
-    color: #ffcc00;
+  color: #ffcc00;
 }
 
-/* Page Container */
-.page-container {
-    max-width: 600px;
-    margin: 120px auto 40px auto;
-    background-color: #ffffff;
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    text-align: center;
+/* Transitions */
+.fade-in-up {
+  animation: fadeInUp 0.5s ease-out both;
 }
 
-/* Form Container */
-.form-container {
-    width: 100%;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.form-container input,
-.form-container select,
-.form-container textarea {
-    width: 100%;
-    padding: 14px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    font-size: 1em;
-    transition: border-color 0.3s;
-}
-
-.form-container input:focus,
-.form-container select:focus,
-.form-container textarea:focus {
-    border-color: #006400;
-    outline: none;
-}
-
-.form-container .btn {
-    width: 100%;
-    padding: 14px;
-    font-size: 1.2em;
-    background: linear-gradient(to right, #ff8c00, #ffa500);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.3s, transform 0.2s;
-}
-
-.form-container .btn:hover {
-    background: linear-gradient(to right, #e67e00, #ff9900);
-    transform: translateY(-2px);
-}
-
-/* Dashboard Styling */
-.dashboard-container {
-    text-align: center;
-    margin: 120px auto;
-    max-width: 700px;
-    background: #fff;
-    padding: 50px;
-    border-radius: 18px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-}
-
-.dashboard-container h2 {
-    font-size: 2em;
-    margin-bottom: 15px;
-    color: #222;
-}
-
-.dashboard-container h3 {
-    font-size: 1.5em;
-    color: #444;
-    margin-bottom: 25px;
-}
-
-.dashboard-container p {
-    font-size: 1.1em;
-    margin-bottom: 20px;
-    color: #666;
-}
-
-.btn {
-    display: inline-block;
-    padding: 14px 24px;
-    background: #006400;
-    color: white;
-    text-decoration: none;
-    border-radius: 10px;
-    font-size: 1.1em;
-    font-weight: bold;
-    margin: 10px;
-    transition: background-color 0.3s ease;
-}
-
-.btn:hover {
-    background-color: #004d00;
-}
-
-/* Footer */
-.footer {
-    background-color: #006400;
-    padding: 20px;
-    text-align: center;
-    font-size: 14px;
-    color: white;
-    margin-top: 40px;
-}
-
-/* Responsive */
+/* Responsive Utility (for non-Tailwind elements) */
 @media (max-width: 768px) {
-    .navbar {
-        flex-direction: column;
-        text-align: center;
-    }
+  .navbar {
+    flex-direction: column;
+    text-align: center;
+  }
 
-    .navbar nav {
-        margin-top: 10px;
-    }
-
-    .page-container,
-    .dashboard-container {
-        margin: 100px 20px 40px 20px;
-    }
+  .navbar nav {
+    margin-top: 10px;
+  }
 }

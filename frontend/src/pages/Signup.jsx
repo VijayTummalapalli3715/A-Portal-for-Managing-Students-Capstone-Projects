@@ -1,3 +1,4 @@
+// ✅ Refactored Signup.jsx for modern UX and consistent styling
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -5,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
+import { motion } from "framer-motion";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -52,6 +54,7 @@ export default function Signup() {
           role: formData.role,
         }),
       });
+
       alert("Registration Successful");
       navigate("/login");
     } catch (error) {
@@ -62,7 +65,6 @@ export default function Signup() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="bg-gradient-to-r from-green-800 to-green-600 text-white shadow-md fixed top-0 left-0 w-full z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
@@ -89,47 +91,30 @@ export default function Signup() {
         </div>
       </header>
 
-      {/* Signup Form */}
       <main className="flex flex-col items-center justify-center flex-1 px-6 mt-32 mb-10">
-        <div className="w-full max-w-md p-6 bg-white shadow-md rounded-lg">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="w-full max-w-md p-6 bg-white shadow-md rounded-xl"
+        >
           <h2 className="text-2xl font-bold text-gray-800 text-center mb-4">
             Create an Account
           </h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
               <Label htmlFor="name">Full Name</Label>
-              <Input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
+              <Input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
             </div>
-            <div className="mb-4">
+            <div>
               <Label htmlFor="email">Email</Label>
-              <Input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
+              <Input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
             </div>
-            <div className="mb-4">
+            <div>
               <Label htmlFor="password">Password</Label>
-              <Input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
+              <Input type="password" id="password" name="password" value={formData.password} onChange={handleChange} required />
             </div>
-            <div className="mb-4">
+            <div>
               <Label htmlFor="role">Select Role</Label>
               <select
                 id="role"
@@ -138,30 +123,26 @@ export default function Signup() {
                 onChange={handleChange}
                 className="w-full p-2 border rounded-md"
               >
-               <option value="Student">Student</option>
-              <option value="Instructor">Instructor</option>
-              <option value="Client">Client</option>
+                <option value="Student">Student</option>
+                <option value="Instructor">Instructor</option>
+                <option value="Client">Client</option>
               </select>
             </div>
-            <Button
-              type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold"
-            >
+            <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold">
               Sign Up
             </Button>
           </form>
           <p className="mt-4 text-center text-gray-600">
-            Already have an account?{" "}
+            Already have an account? {" "}
             <a href="/login" className="text-blue-500 hover:underline">
               Login
             </a>
           </p>
-        </div>
+        </motion.div>
       </main>
 
-      {/* Footer */}
       <footer className="bg-green-800 text-white text-sm py-4 text-center">
-        © 2025 Capstone Portal. All rights reserved. | Contact us:{" "}
+        © 2025 Capstone Portal. All rights reserved. | Contact us: {" "}
         <a href="mailto:support@capstoneportal.com" className="text-blue-300 underline">
           support@capstoneportal.com
         </a>{" "}
