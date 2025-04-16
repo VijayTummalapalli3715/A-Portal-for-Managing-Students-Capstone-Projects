@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import Sidebar from "@/components/ui/sidebar";
+import StudentSidebar from "@/student/StudentSidebar";
 import { useNavigate } from "react-router-dom";
 
 const TopbarWithSidebar = ({ children }) => {
@@ -47,7 +47,7 @@ const TopbarWithSidebar = ({ children }) => {
 
       <div className="flex pt-20">
         <aside className="hidden md:block w-64 bg-white border-r border-gray-200">
-          <Sidebar />
+          <StudentSidebar />
         </aside>
         <main className="flex-1 p-6 max-w-7xl mx-auto">{children}</main>
       </div>

@@ -6,6 +6,9 @@ const addPreference = async (req, res) => {
     const { project_id } = req.body;
     const student = req.user.db;
 
+    // 🐛 Debug log to check current user
+    console.log("👤 Logged-in user:", student);
+
     // ✅ Ensure project_id is sent
     if (!project_id) {
       return res.status(400).json({ error: "Project ID is required." });

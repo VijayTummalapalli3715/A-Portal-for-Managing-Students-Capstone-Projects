@@ -10,9 +10,9 @@ import StudentDashboard from "./student/StudentDashboard";
 import ClientDashboard from "./client/ClientDashboard";
 import CreateProject from "./client/CreateProject";
 import Projects from "./client/Projects";
-import ViewProjects from "@/pages/ViewProjects";
-import ProvidePreferences from "@/pages/ProvidePreferences";
-import AssignedProjects from "./pages/AssignedProjects";
+import ViewProjects from "@/student/ViewProjects";
+import ProvidePreferences from "@/student/ProvidePreferences";
+import AssignedProjects from "./student/AssignedProjects";
 import { Toaster } from "sonner";
 
 import AuthProvider from "./context/AuthProvider"; // ✅ Wrap app in this

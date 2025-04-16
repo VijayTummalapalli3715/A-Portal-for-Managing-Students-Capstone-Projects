@@ -25,17 +25,20 @@ const userRoutes = require("./routes/userRoutes");
 const projectRoutes = require("./routes/projectRoutes");
 const groupRoutes = require("./routes/groupRoutes");
 const preferenceRoutes = require("./routes/preferenceRoutes");
-
-
-// ✅ Import new route for client dashboard
 const clientRoutes = require("./routes/clientRoutes");
+
+// ✅ NEW: Import assigned project route for student
+const assignedRoutes = require("./routes/studentRoutes");
 
 // Define routes
 app.use("/api/users", userRoutes);
-app.use("/api/projects", projectRoutes); // also includes /projects/recommended
+app.use("/api/projects", projectRoutes); // includes /recommended
 app.use("/api/groups", groupRoutes);
 app.use("/api/preferences", preferenceRoutes);
-app.use("/client", clientRoutes); // ✅ new client dashboard route
+app.use("/client", clientRoutes);
+
+// ✅ NEW: Student-specific APIs (assigned project, etc.)
+app.use("/api/student", assignedRoutes);
 
 // Default route
 app.get("/", (req, res) => {
