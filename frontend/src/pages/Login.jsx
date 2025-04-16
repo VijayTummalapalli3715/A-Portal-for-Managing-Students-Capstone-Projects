@@ -1,14 +1,17 @@
-// ✅ Refactored Login.jsx with clean layout, animation, and consistent input styling
+// ✅ Refactored Login.jsx with topbar and toggleable sidebar support
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X } from "lucide-react";
+import Sidebar from "@/components/ui/sidebar";
 
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "", role: "Student" });
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -44,31 +47,38 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
+      {/* Topbar */}
       <header className="fixed top-0 left-0 w-full bg-green-800 text-white shadow-md z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => navigate(-1)}
-              className="text-white text-sm font-semibold hover:text-yellow-300"
-            >
-              ←
-            </Button>
+            <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="text-white md:hidden">
+              {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
             <h1 className="text-xl font-bold">Capstone Project Management Portal</h1>
           </div>
-          <nav className="flex gap-6 text-sm font-semibold">
-            <Button variant="ghost" onClick={() => navigate("/home")}>Home</Button>
-            <Button variant="ghost" onClick={() => navigate("/login")}>Login</Button>
-            <Button variant="ghost" onClick={() => navigate("/about")}>About</Button>
-            <Button
-              className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-2 rounded-md"
-              onClick={() => navigate("/signup")}
-            >
-              Get Started
-            </Button>
+          <nav className="hidden md:flex gap-6 text-sm font-semibold">
+            <Button variant="ghost" onClick={() => navigate("/home")} className="text-white">Home</Button>
+            <Button variant="ghost" onClick={() => navigate("/login")} className="text-white">Login</Button>
+            <Button variant="ghost" onClick={() => navigate("/about")} className="text-white">About</Button>
+            <Button className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-2 rounded-md" onClick={() => navigate("/signup")}>Get Started</Button>
           </nav>
         </div>
       </header>
+
+      {/* Sidebar (Mobile only) */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.aside
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed top-16 left-0 w-64 h-full bg-white shadow-lg z-40 md:hidden"
+          >
+            <Sidebar />
+          </motion.aside>
+        )}
+      </AnimatePresence>
 
       <main className="flex flex-1 justify-center items-center pt-32 pb-12">
         <motion.form
