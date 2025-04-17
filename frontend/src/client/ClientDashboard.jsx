@@ -69,9 +69,9 @@ const ClientDashboard = () => {
     <TopbarWithSidebar>
       <div className="flex justify-between items-center mb-10">
         <h1 className="text-4xl font-bold text-gray-800">Client Dashboard</h1>
-        <Button variant="ghost" onClick={handleLogout} className="gap-2 text-red-600 hover:text-red-700">
+        {/* <Button variant="ghost" onClick={handleLogout} className="gap-2 text-red-600 hover:text-red-700">
           <LogOut className="h-4 w-4" /> Logout
-        </Button>
+        </Button> */}
       </div>
 
       {/* Tasks & Events */}

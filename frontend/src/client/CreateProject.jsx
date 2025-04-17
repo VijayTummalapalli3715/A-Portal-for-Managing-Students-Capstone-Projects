@@ -3,24 +3,23 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Sidebar from "@/components/ui/sidebar";
-import { getAuth } from "firebase/auth";
+import TopbarWithSidebar from "@/pages/TopbarWithSidebar";
 
 const CreateProject = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     title: "",
     description: "",
-    skills: "",
-    expectedOutcomes: "",
+    skills_required: "",
+    expected_outcomes: "",
     flexibility: "",
     difficulty: "",
-    totalHours: "",
-    mainCategory: "",
-    subCategories: "",
-    teamSize: "",
-    startDate: "",
-    endDate: "",
+    total_hours: "",
+    main_category: "",
+    sub_categories: "",
+    team_size: "",
+    start_date: "",
+    end_date: "",
   });
 
   const handleChange = (e) => {
@@ -29,31 +28,13 @@ const CreateProject = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const projectData = {
-      title: form.title,
-      description: form.description,
-      skills_required: form.skills,
-      expected_outcomes: form.expectedOutcomes,
-      flexibility: form.flexibility,
-      difficulty: form.difficulty,
-      total_hours: form.totalHours,
-      main_category: form.mainCategory,
-      sub_categories: form.subCategories,
-      team_size: form.teamSize,
-      start_date: form.startDate,
-      end_date: form.endDate,
-      resources: "",
-    };
-
     try {
-      const auth = getAuth();
-      const user = auth.currentUser;
-      if (!user) {
-        alert("User not logged in.");
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in to create a project");
+        navigate("/login");
         return;
       }
-
-      const token = await user.getIdToken();
 
       const response = await fetch("http://localhost:5006/api/projects", {
         method: "POST",
@@ -61,143 +42,207 @@ const CreateProject = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(projectData),
+        body: JSON.stringify(form),
       });
 
-      const result = await response.json();
-      if (response.ok) {
-        alert(result.message);
-        navigate("/client/dashboard");
-      } else {
-        alert("Failed to submit project.");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create project");
       }
+
+      navigate("/client/projects", { state: { projectCreated: true } });
     } catch (error) {
-      alert("An error occurred while submitting the project.");
+      console.error("Error creating project:", error);
+      alert(error.message || "Failed to create project. Please try again.");
     }
   };
 
-  const inputClass =
-    "w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-100 via-white to-sky-100 flex">
-      <Sidebar />
-      <main className="flex-1 flex flex-col items-center py-20 px-8 overflow-y-auto">
-        <Card className="w-full max-w-7xl rounded-2xl shadow-xl border border-blue-200 bg-white">
-          <CardHeader className="bg-blue-50 rounded-t-2xl p-6 border-b border-blue-200">
-            <CardTitle className="text-3xl font-bold text-blue-700 text-center">
-              ✨ Create New Project
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-12 pt-10 pb-12 space-y-12">
-            <form id="createProjectForm" onSubmit={handleSubmit} className="space-y-12">
-              {/* Section 1: Project Basics */}
-              <div>
-                <h3 className="text-xl font-semibold text-blue-600 mb-6">📌 Project Basics</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {["title", "skills", "mainCategory", "subCategories", "totalHours", "teamSize"].map((key, i) => (
-                    <div key={i}>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        {key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase())}
-                      </label>
-                      <input
-                        type={key.includes("Hours") || key.includes("Size") ? "number" : "text"}
-                        name={key}
-                        value={form[key]}
-                        onChange={handleChange}
-                        placeholder={key === "skills" ? "e.g., React, Python" : ""}
-                        className={inputClass}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Section 2: Description */}
-              <div>
-                <h3 className="text-xl font-semibold text-blue-600 mb-6">📝 Description</h3>
-                <div className="space-y-6">
-                  {["description", "expectedOutcomes"].map((key, i) => (
-                    <div key={i}>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        {key === "description" ? "Project Description" : "Expected Outcomes"}
-                      </label>
-                      <textarea
-                        name={key}
-                        value={form[key]}
-                        onChange={handleChange}
-                        rows={key === "description" ? 4 : 3}
-                        className={inputClass}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Section 3: Settings */}
-              <div>
-                <h3 className="text-xl font-semibold text-blue-600 mb-6">⚙️ Settings & Timeline</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {[
-                    {
-                      name: "flexibility",
-                      label: "Project Flexibility",
-                      options: ["", "Fixed", "Flexible"],
-                    },
-                    {
-                      name: "difficulty",
-                      label: "Difficulty Level",
-                      options: ["", "Beginner", "Intermediate", "Advanced"],
-                    },
-                  ].map(({ name, label, options }, i) => (
-                    <div key={i}>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">{label}</label>
-                      <select
-                        name={name}
-                        value={form[name]}
-                        onChange={handleChange}
-                        className={inputClass}
-                      >
-                        {options.map((opt, idx) => (
-                          <option key={idx} value={opt}>
-                            {opt || "Select"}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  ))}
-
-                  {["startDate", "endDate"].map((key, i) => (
-                    <div key={i}>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        {key === "startDate" ? "Start Date" : "End Date"}
-                      </label>
-                      <input
-                        type="date"
-                        name={key}
-                        value={form[key]}
-                        onChange={handleChange}
-                        className={inputClass}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-
-        <div className="mt-10 flex justify-center">
-          <button
-            type="submit"
-            form="createProjectForm"
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-10 py-3 text-lg font-semibold rounded-xl shadow-md hover:scale-105 hover:shadow-lg transition-transform duration-300 ease-in-out"
-          >
-            Submit Project
-          </button>
+    <TopbarWithSidebar>
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-800">Create New Project</h1>
+          <Button variant="outline" onClick={() => navigate("/client/projects")}>
+            Cancel
+          </Button>
         </div>
-      </main>
-    </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Project Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Title</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={form.title}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <textarea
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                  rows={4}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Required Skills</label>
+                <input
+                  type="text"
+                  name="skills_required"
+                  value={form.skills_required}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="e.g., React, Node.js, Python"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Expected Outcomes</label>
+                <textarea
+                  name="expected_outcomes"
+                  value={form.expected_outcomes}
+                  onChange={handleChange}
+                  rows={3}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Project Parameters</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Flexibility</label>
+                  <select
+                    name="flexibility"
+                    value={form.flexibility}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  >
+                    <option value="">Select flexibility</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Difficulty</label>
+                  <select
+                    name="difficulty"
+                    value={form.difficulty}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  >
+                    <option value="">Select difficulty</option>
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Total Hours</label>
+                  <input
+                    type="number"
+                    name="total_hours"
+                    value={form.total_hours}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    min="0"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Team Size</label>
+                  <input
+                    type="number"
+                    name="team_size"
+                    value={form.team_size}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    min="1"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Main Category</label>
+                <input
+                  type="text"
+                  name="main_category"
+                  value={form.main_category}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Sub Categories</label>
+                <input
+                  type="text"
+                  name="sub_categories"
+                  value={form.sub_categories}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="e.g., Web Development, Mobile App"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                  <input
+                    type="date"
+                    name="start_date"
+                    value={form.start_date}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">End Date</label>
+                  <input
+                    type="date"
+                    name="end_date"
+                    value={form.end_date}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-end gap-4">
+            <Button type="button" variant="outline" onClick={() => navigate("/client/projects")}>
+              Cancel
+            </Button>
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+              Create Project
+            </Button>
+          </div>
+        </form>
+      </div>
+    </TopbarWithSidebar>
   );
 };
 

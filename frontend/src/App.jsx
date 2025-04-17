@@ -5,7 +5,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import About from "./pages/About";
-import InstructorDashboard from "./instructer/InstructorDashboard";
+import InstructorDashboard from "./instructor/InstructorDashboard";
 import StudentDashboard from "./student/StudentDashboard";
 import ClientDashboard from "./client/ClientDashboard";
 import CreateProject from "./client/CreateProject";
@@ -21,6 +21,15 @@ import Teams from "./client/Teams";
 import Achievements from "./client/Achievements";
 import Bookmarks from "./client/Bookmarks";
 
+// Import instructor components (you'll need to create these files)
+import InstructorStudents from "./instructor/InstructorStudents";
+import InstructorEvaluations from "./instructor/InstructorEvaluations";
+import InstructorAnnouncements from "./instructor/InstructorAnnouncements";
+import InstructorAddStudent from "./instructor/InstructorAddStudent";
+import InstructorCreateProject from "./instructor/InstructorCreateProject";
+import InstructorCreateAnnouncement from "./instructor/InstructorCreateAnnouncement";
+import InstructorScheduleEvaluation from "./instructor/InstructorScheduleEvaluation";
+
 function App() {
   return (
     <AuthProvider>
@@ -32,20 +41,30 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/about" element={<About />} />
           <Route path="/create-project" element={<CreateProject />} />
+          
+          {/* Instructor Routes */}
           <Route path="/instructor/dashboard" element={<InstructorDashboard />} />
+          <Route path="/instructor/students" element={<InstructorStudents />} />
+          <Route path="/instructor/students/add" element={<InstructorAddStudent />} />
+          <Route path="/instructor/evaluations" element={<InstructorEvaluations />} />
+          <Route path="/instructor/evaluations/schedule" element={<InstructorScheduleEvaluation />} />
+          <Route path="/instructor/announcements" element={<InstructorAnnouncements />} />
+          <Route path="/instructor/announcements/create" element={<InstructorCreateAnnouncement />} />
+          <Route path="/instructor/projects/create" element={<InstructorCreateProject />} />
+          
+          {/* Student Routes */}
           <Route path="/student/dashboard" element={<StudentDashboard />} />
           <Route path="/student/view-projects" element={<ViewProjects />} />
           <Route path="/student/provide-preferences" element={<ProvidePreferences />} />
           <Route path="/student/assigned-projects" element={<AssignedProjects />} />
+          
+          {/* Client Routes */}
           <Route path="/client/dashboard" element={<ClientDashboard />} />
           <Route path="/client/projects" element={<Projects />} />
           <Route path="/client/teams" element={<Teams />} />
           <Route path="/client/achievements" element={<Achievements />} />
           <Route path="/client/bookmarks" element={<Bookmarks />} />
           <Route path="/edit-project/:projectId" element={<CreateProject />} />
-
-         
-          
         </Routes>
       </Router>
       <Toaster richColors />

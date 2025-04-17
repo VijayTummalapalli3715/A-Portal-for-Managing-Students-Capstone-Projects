@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import Sidebar from "@/components/ui/sidebar";
 import { Eye, Pencil } from "lucide-react";
+import TopbarWithSidebar from "@/pages/TopbarWithSidebar";
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
@@ -82,55 +82,52 @@ const Projects = () => {
   );
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
-      <Sidebar />
-      <main className="flex-1 p-8 max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-10">
-          <div>
-            <h1 className="text-4xl font-bold text-blue-800">📁 My Projects</h1>
-            <p className="text-sm text-gray-500">Manage your proposals and track progress</p>
-          </div>
-          <Button
-            onClick={() => navigate("/create-project")}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow-md"
-          >
-            + Create Project
-          </Button>
+    <TopbarWithSidebar>
+      <div className="flex justify-between items-center mb-10">
+        <div>
+          <h1 className="text-4xl font-bold text-blue-800">📁 My Projects</h1>
+          <p className="text-sm text-gray-500">Manage your proposals and track progress</p>
         </div>
+        <Button
+          onClick={() => navigate("/create-project")}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow-md"
+        >
+          + Create Project
+        </Button>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Approved */}
-          <section className="bg-green-50 border border-green-300 rounded-xl p-4 max-h-[550px] overflow-y-auto">
-            <h2 className="text-xl font-semibold text-green-800 mb-4">✅ Approved Projects</h2>
-            {approved.length === 0 ? (
-              <p className="text-sm text-gray-500 italic">No approved projects.</p>
-            ) : (
-              renderCards(approved)
-            )}
-          </section>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Approved */}
+        <section className="bg-green-50 border border-green-300 rounded-xl p-4 max-h-[550px] overflow-y-auto">
+          <h2 className="text-xl font-semibold text-green-800 mb-4">✅ Approved Projects</h2>
+          {approved.length === 0 ? (
+            <p className="text-sm text-gray-500 italic">No approved projects.</p>
+          ) : (
+            renderCards(approved)
+          )}
+        </section>
 
-          {/* Rejected */}
-          <section className="bg-red-50 border border-red-300 rounded-xl p-4 max-h-[550px] overflow-y-auto">
-            <h2 className="text-xl font-semibold text-red-800 mb-4">❌ Rejected Projects</h2>
-            {rejected.length === 0 ? (
-              <p className="text-sm text-gray-500 italic">No rejected projects.</p>
-            ) : (
-              renderCards(rejected)
-            )}
-          </section>
+        {/* Rejected */}
+        <section className="bg-red-50 border border-red-300 rounded-xl p-4 max-h-[550px] overflow-y-auto">
+          <h2 className="text-xl font-semibold text-red-800 mb-4">❌ Rejected Projects</h2>
+          {rejected.length === 0 ? (
+            <p className="text-sm text-gray-500 italic">No rejected projects.</p>
+          ) : (
+            renderCards(rejected)
+          )}
+        </section>
 
-          {/* Pending */}
-          <section className="bg-yellow-50 border border-yellow-300 rounded-xl p-4 max-h-[550px] overflow-y-auto">
-            <h2 className="text-xl font-semibold text-yellow-700 mb-4">⏳ Pending Projects</h2>
-            {pending.length === 0 ? (
-              <p className="text-sm text-gray-500 italic">No pending projects.</p>
-            ) : (
-              renderCards(pending)
-            )}
-          </section>
-        </div>
-      </main>
-    </div>
+        {/* Pending */}
+        <section className="bg-yellow-50 border border-yellow-300 rounded-xl p-4 max-h-[550px] overflow-y-auto">
+          <h2 className="text-xl font-semibold text-yellow-800 mb-4">⏳ Pending Projects</h2>
+          {pending.length === 0 ? (
+            <p className="text-sm text-gray-500 italic">No pending projects.</p>
+          ) : (
+            renderCards(pending)
+          )}
+        </section>
+      </div>
+    </TopbarWithSidebar>
   );
 };
 
