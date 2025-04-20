@@ -9,7 +9,7 @@ import InstructorSidebar from "@/instructor/InstructorSidebar";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const TopbarWithSidebar = ({ children }) => {
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isSidebarOpen, setSidebarOpen] = useState(true); // Default to open on desktop
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const navigate = useNavigate();
   const location = useLocation();
@@ -17,9 +17,13 @@ const TopbarWithSidebar = ({ children }) => {
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      // Auto-close sidebar on mobile, auto-open on desktop
+      setSidebarOpen(width >= 768);
     };
     window.addEventListener('resize', handleResize);
+    handleResize(); // Call on initial mount
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -41,7 +45,7 @@ const TopbarWithSidebar = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
+    <div className="min-h-screen bg-gray-100">
       {/* Topbar */}
       <header className="fixed top-0 left-0 right-0 bg-green-800 text-white shadow-md z-50">
         <div className="w-full px-4 py-4 flex justify-between items-center">
@@ -66,28 +70,31 @@ const TopbarWithSidebar = ({ children }) => {
         </div>
       </header>
 
-      {/* Mobile Sidebar */}
-      <AnimatePresence>
-        {isSidebarOpen && isMobile && (
-          <motion.aside
-            initial={{ x: "-100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed top-16 left-0 w-64 h-[calc(100vh-4rem)] bg-white shadow-lg z-40 md:hidden overflow-y-auto"
-          >
-            {getSidebar()}
-          </motion.aside>
-        )}
-      </AnimatePresence>
-
-      <div className="flex pt-16 h-screen w-full">
-        {/* Desktop Sidebar */}
-        <aside className={`hidden md:block w-64 bg-white border-r border-gray-200 transition-all duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className="flex pt-16">
+        {/* Sidebar */}
+        <aside 
+          className={`fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white shadow-lg transition-transform duration-300 ease-in-out z-40
+            ${isMobile ? 'w-64' : 'w-64'} 
+            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+            ${isMobile ? 'md:hidden' : 'hidden md:block'}`}
+        >
           {getSidebar()}
         </aside>
-        <main className={`flex-1 w-full transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : ''}`}>
-          <div className="h-full w-full p-4 md:p-6">
+
+        {/* Mobile Sidebar Overlay */}
+        {isMobile && isSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* Main Content */}
+        <main 
+          className={`flex-1 transition-all duration-300 ease-in-out min-h-screen
+            ${isSidebarOpen ? 'md:pl-64' : 'pl-0'}`}
+        >
+          <div className="p-6 max-w-[100%]">
             {children}
           </div>
         </main>
