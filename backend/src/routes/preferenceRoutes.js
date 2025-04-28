@@ -1,13 +1,13 @@
 const express = require("express");
-const { addPreference, getPreferences } = require("../controllers/preferenceController");
-const { protect } = require("../middleware/authMiddleware"); // Ensure authentication
+const { addPreference, getStudentPreferences } = require("../controllers/preferenceController");
+const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// Route for students to add their preferred projects (POST request)
+// Student adds a project as preference
 router.post("/", protect, addPreference);
 
-// Route to get all preferences (GET request)
-router.get("/", protect, getPreferences);
+// Student views his/her own preferences
+router.get("/student", protect, getStudentPreferences);
 
 module.exports = router;

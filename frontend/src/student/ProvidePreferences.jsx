@@ -19,8 +19,6 @@ const ProvidePreferences = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        
-        
 
         if (!res.ok) {
           const { message } = await res.json();
@@ -41,7 +39,11 @@ const ProvidePreferences = () => {
 
   return (
     <TopbarWithSidebar>
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
         <h1 className="text-4xl font-bold mb-8 text-gray-800">Your Preferred Projects</h1>
 
         {loading && <p className="text-gray-600">Loading preferences...</p>}
@@ -58,11 +60,11 @@ const ProvidePreferences = () => {
                 <CardContent className="space-y-4">
                   <p className="text-gray-700">{project.description}</p>
 
-                  {project.skills && (
+                  {project.skills_required && (
                     <div>
                       <p className="font-semibold">Skills Required:</p>
                       <ul className="list-disc list-inside text-gray-700">
-                        {project.skills.split(",").map((skill, i) => (
+                        {project.skills_required.split(",").map((skill, i) => (
                           <li key={i}>{skill.trim()}</li>
                         ))}
                       </ul>

@@ -13,7 +13,7 @@ const ViewProjects = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await fetch("http://localhost:5006/api/projects"); // ✅ updated port
+        const res = await fetch("http://localhost:5006/api/projects"); // ✅ Fetch from backend
         if (!res.ok) throw new Error("Failed to fetch projects");
         const data = await res.json();
         setProjects(data);
@@ -31,7 +31,6 @@ const ViewProjects = () => {
 
     try {
       const token = localStorage.getItem("token");
-
       const res = await fetch("http://localhost:5006/api/preferences", {
         method: "POST",
         headers: {
@@ -45,7 +44,7 @@ const ViewProjects = () => {
 
       if (!res.ok) throw new Error(result.error || "Error adding preference");
 
-      setMessage(result.message);
+      setMessage(result.message || "Preference added successfully.");
     } catch (err) {
       setError(err.message || "Something went wrong");
     }
@@ -60,60 +59,64 @@ const ViewProjects = () => {
         {message && <p className="text-green-600 font-medium mb-4">{message}</p>}
 
         <div className="space-y-6">
-          {projects.map((project) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-              onMouseEnter={() => setHoveredId(project.id)}
-              onMouseLeave={() => setHoveredId(null)}
-              className="relative"
-            >
-              <Card className="w-full shadow-lg bg-white rounded-xl transition duration-200">
-                {hoveredId === project.id && (
-                  <div className="absolute top-4 right-4 z-10">
-                    <Button
-                      size="sm"
-                      className="bg-white text-black border border-black hover:bg-gray-200"
-                      onClick={() => handleAddPreference(project.id)}
-                    >
-                      Add Preference
-                    </Button>
-                  </div>
-                )}
-                <CardHeader>
-                  <CardTitle className="text-xl text-blue-700">{project.title}</CardTitle>
-                  <CardDescription className="text-gray-600">Client: {project.client}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-gray-700">{project.description}</p>
-
-                  {project.skills_required && (
-                    <div>
-                      <p className="font-semibold">Skills Required:</p>
-                      <ul className="list-disc list-inside text-gray-700">
-                        {project.skills_required.split(",").map((skill, i) => (
-                          <li key={i}>{skill.trim()}</li>
-                        ))}
-                      </ul>
+          {projects.length === 0 ? (
+            <p className="text-gray-600">No projects available at the moment.</p>
+          ) : (
+            projects.map((project) => (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                onMouseEnter={() => setHoveredId(project.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                className="relative"
+              >
+                <Card className="w-full shadow-lg bg-white rounded-xl transition duration-200">
+                  {hoveredId === project.id && (
+                    <div className="absolute top-4 right-4 z-10">
+                      <Button
+                        size="sm"
+                        className="bg-white text-black border border-black hover:bg-gray-200"
+                        onClick={() => handleAddPreference(project.id)}
+                      >
+                        Add Preference
+                      </Button>
                     </div>
                   )}
+                  <CardHeader>
+                    <CardTitle className="text-xl text-blue-700">{project.title}</CardTitle>
+                    <CardDescription className="text-gray-600">Client: {project.client}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-gray-700">{project.description}</p>
 
-                  {project.resources && (
-                    <div>
-                      <p className="font-semibold">Resources:</p>
-                      <ul className="list-disc list-inside text-gray-700">
-                        {project.resources.split(",").map((res, i) => (
-                          <li key={i}>{res.trim()}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                    {project.skills_required && (
+                      <div>
+                        <p className="font-semibold">Skills Required:</p>
+                        <ul className="list-disc list-inside text-gray-700">
+                          {project.skills_required.split(",").map((skill, i) => (
+                            <li key={i}>{skill.trim()}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {project.resources && (
+                      <div>
+                        <p className="font-semibold">Resources:</p>
+                        <ul className="list-disc list-inside text-gray-700">
+                          {project.resources.split(",").map((res, i) => (
+                            <li key={i}>{res.trim()}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))
+          )}
         </div>
       </motion.div>
     </TopbarWithSidebar>
