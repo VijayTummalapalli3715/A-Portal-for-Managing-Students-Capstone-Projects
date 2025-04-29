@@ -5,17 +5,14 @@ import {
   LayoutDashboard, 
   BookOpen, 
   ListChecks, 
-  Folder,
-  GraduationCap
-} from "lucide-react";
+  Folder
+} from "lucide-react"; // Removed GraduationCap import
 
 const StudentSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isActiveRoute = (path) => {
-    return location.pathname === path;
-  };
+  const isActiveRoute = (path) => location.pathname === path;
 
   const menuItems = [
     {
@@ -43,9 +40,10 @@ const StudentSidebar = () => {
   return (
     <div className="bg-blue-900 h-full p-4">
       <div className="flex items-center gap-2 mb-6">
-        <GraduationCap className="w-8 h-8 text-white" />
+        {/* Removed GraduationCap Icon */}
         <h2 className="text-xl font-bold text-white">Student Portal</h2>
       </div>
+      
       <nav className="flex flex-col space-y-1">
         {menuItems.map((item) => (
           <Button
@@ -53,7 +51,7 @@ const StudentSidebar = () => {
             variant="ghost"
             onClick={() => navigate(item.path)}
             className={`justify-start text-left w-full text-white hover:bg-blue-800 ${
-              isActiveRoute(item.path) && "bg-blue-800"
+              isActiveRoute(item.path) ? "bg-blue-800" : ""
             }`}
           >
             {item.icon}

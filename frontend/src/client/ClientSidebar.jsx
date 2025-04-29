@@ -7,8 +7,6 @@ const ClientSidebar = () => {
     { name: "My Dashboard", path: "/client/dashboard", icon: LayoutDashboard },
     { name: "My Projects", path: "/client/projects", icon: FolderKanban },
     { name: "My Teams", path: "/client/teams", icon: Users },
-    { name: "My Achievements", path: "/client/achievements", icon: Trophy },
-    { name: "My Bookmarks", path: "/client/bookmarks", icon: Bookmark },
   ];
 
   return (

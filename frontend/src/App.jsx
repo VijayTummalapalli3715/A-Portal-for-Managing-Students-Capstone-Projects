@@ -18,8 +18,6 @@ import { Toaster } from "sonner";
 import AuthProvider from "./context/AuthProvider"; // ✅ Wrap app in this
 import "./styles.css";
 import Teams from "./client/Teams";
-import Achievements from "./client/Achievements";
-import Bookmarks from "./client/Bookmarks";
 
 // Import instructor components (you'll need to create these files)
 import InstructorStudents from "./instructor/InstructorStudents";
@@ -62,8 +60,6 @@ function App() {
           <Route path="/client/dashboard" element={<ClientDashboard />} />
           <Route path="/client/projects" element={<Projects />} />
           <Route path="/client/teams" element={<Teams />} />
-          <Route path="/client/achievements" element={<Achievements />} />
-          <Route path="/client/bookmarks" element={<Bookmarks />} />
           <Route path="/edit-project/:projectId" element={<CreateProject />} />
         </Routes>
       </Router>
