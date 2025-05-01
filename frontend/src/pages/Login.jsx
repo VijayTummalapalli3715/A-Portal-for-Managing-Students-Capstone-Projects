@@ -7,11 +7,13 @@ import { auth } from "@/firebaseConfig";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
+import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "", role: "Student" });
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -19,29 +21,53 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      const user = userCredential.user;
-      const token = await user.getIdToken();
+    setLoading(true);
 
-      const res = await fetch("http://localhost:5006/api/users/me", {
-        headers: { Authorization: `Bearer ${token}` },
+    try {
+      // 1. Sign in with Firebase
+      const userCredential = await signInWithEmailAndPassword(
+        auth, 
+        formData.email, 
+        formData.password
+      );
+      
+      // 2. Get Firebase token
+      const token = await userCredential.user.getIdToken();
+      
+      // 3. Verify with backend
+      const response = await fetch("http://localhost:5006/api/users/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ role: formData.role }),
       });
 
-      if (!res.ok) throw new Error("Failed to fetch user info from backend");
-      const dbUser = await res.json();
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to verify user role");
+      }
 
-      localStorage.setItem("clientId", dbUser.id);
+      const userData = await response.json();
+
+      // 4. Store necessary information
       localStorage.setItem("token", token);
-      localStorage.setItem("uid", user.uid);
-      localStorage.setItem(`role-${user.uid}`, formData.role);
+      localStorage.setItem("uid", userCredential.user.uid);
+      localStorage.setItem("role", userData.role);
+      localStorage.setItem("userId", userData.id);
 
-      if (formData.role === "Student") navigate("/student/dashboard");
-      else if (formData.role === "Instructor") navigate("/instructor/dashboard");
-      else if (formData.role === "Client") navigate("/client/dashboard");
+      // 5. Navigate based on role
+      toast.success("Login successful!");
+      if (userData.role === "Student") navigate("/student/dashboard");
+      else if (userData.role === "Instructor") navigate("/instructor/dashboard");
+      else if (userData.role === "Client") navigate("/client/dashboard");
+      
     } catch (error) {
-      console.error("Login failed:", error.message);
-      alert("Invalid credentials or server error. Please try again.");
+      console.error("Login error:", error);
+      toast.error(error.message || "Invalid credentials or server error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -130,9 +156,10 @@ const Login = () => {
 
           <Button
             type="submit"
+            disabled={loading}
             className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 rounded-md"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </Button>
         </motion.form>
       </main>

@@ -19,6 +19,7 @@ const { createUserTable } = require("./models/userModel");
 const { createProjectsTable } = require("./models/project");
 const { createGroupsTable } = require("./models/groups");
 const { createPreferencesTable } = require("./models/preferences");
+const { createNotificationsTable } = require("./models/notifications");
 
 // Import routes
 const userRoutes = require("./routes/userRoutes");
@@ -56,22 +57,28 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Something went wrong!" });
 });
 
-// Start the server and create tables
-const PORT = process.env.PORT || 5000;
-
-(async () => {
+// Initialize database tables
+const initializeTables = async () => {
   try {
+    // Create tables in order (respecting foreign key constraints)
     await createUserTable();
     await createProjectsTable();
     await createGroupsTable();
     await createPreferencesTable();
-
-    console.log("✅ All tables are ready.");
-
-    app.listen(PORT, () => {
-      console.log(`🚀 Server is running on port ${PORT}`);
-    });
-  } catch (err) {
-    console.error("❌ Error initializing database tables:", err);
+    await createNotificationsTable();
+    
+    console.log("✅ All database tables initialized successfully");
+  } catch (error) {
+    console.error("❌ Error initializing database tables:", error);
+    process.exit(1);
   }
-})();
+};
+
+// Initialize tables
+initializeTables();
+
+// Start the server
+const PORT = process.env.PORT || 5006;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});

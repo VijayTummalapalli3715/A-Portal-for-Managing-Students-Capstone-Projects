@@ -27,6 +27,13 @@ import InstructorAddStudent from "./instructor/InstructorAddStudent";
 import InstructorCreateProject from "./instructor/InstructorCreateProject";
 import InstructorCreateAnnouncement from "./instructor/InstructorCreateAnnouncement";
 import InstructorScheduleEvaluation from "./instructor/InstructorScheduleEvaluation";
+import InstructorGroups from "./instructor/InstructorGroups";
+import InstructorProfile from "./instructor/InstructorProfile";
+import StudentsList from "./instructor/StudentsList";
+import AddStudent from "./instructor/AddStudent";
+import Groups from "./instructor/Groups";
+import CreateGroup from "./instructor/CreateGroup";
+import InstructorProjects from "./instructor/InstructorProjects";
 
 function App() {
   return (
@@ -42,13 +49,17 @@ function App() {
           
           {/* Instructor Routes */}
           <Route path="/instructor/dashboard" element={<InstructorDashboard />} />
-          <Route path="/instructor/students" element={<InstructorStudents />} />
-          <Route path="/instructor/students/add" element={<InstructorAddStudent />} />
+          <Route path="/instructor/students" element={<StudentsList />} />
+          <Route path="/instructor/students/add" element={<AddStudent />} />
           <Route path="/instructor/evaluations" element={<InstructorEvaluations />} />
           <Route path="/instructor/evaluations/schedule" element={<InstructorScheduleEvaluation />} />
           <Route path="/instructor/announcements" element={<InstructorAnnouncements />} />
           <Route path="/instructor/announcements/create" element={<InstructorCreateAnnouncement />} />
+          <Route path="/instructor/projects" element={<InstructorProjects />} />
           <Route path="/instructor/projects/create" element={<InstructorCreateProject />} />
+          <Route path="/instructor/groups" element={<Groups />} />
+          <Route path="/instructor/groups/create" element={<CreateGroup />} />
+          <Route path="/instructor/profile" element={<InstructorProfile />} />
           
           {/* Student Routes */}
           <Route path="/student/dashboard" element={<StudentDashboard />} />
