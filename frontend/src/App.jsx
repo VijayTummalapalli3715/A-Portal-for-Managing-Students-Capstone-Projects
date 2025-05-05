@@ -14,6 +14,7 @@ import ViewProjects from "@/student/ViewProjects";
 import ProvidePreferences from "@/student/ProvidePreferences";
 import AssignedProjects from "./student/AssignedProjects";
 import { Toaster } from "sonner";
+import InstructorProjectDetails from "./instructor/InstructorProjectDetails";
 
 import AuthProvider from "./context/AuthProvider"; // ✅ Wrap app in this
 import "./styles.css";
@@ -57,6 +58,7 @@ function App() {
           <Route path="/instructor/announcements/create" element={<InstructorCreateAnnouncement />} />
           <Route path="/instructor/projects" element={<InstructorProjects />} />
           <Route path="/instructor/projects/create" element={<InstructorCreateProject />} />
+          <Route path="/instructor/projects/:id" element={<InstructorProjectDetails />} />
           <Route path="/instructor/groups" element={<Groups />} />
           <Route path="/instructor/groups/create" element={<CreateGroup />} />
           <Route path="/instructor/profile" element={<InstructorProfile />} />

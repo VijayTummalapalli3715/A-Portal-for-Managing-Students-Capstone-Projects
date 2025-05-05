@@ -29,11 +29,17 @@ const TopbarWithSidebar = ({ children }) => {
 
   // Determine which sidebar to show based on the current path
   const getSidebar = () => {
-    if (location.pathname.startsWith("/client")) {
+    const userRole = localStorage.getItem("role");
+    
+    if (userRole === "Client") {
       return <ClientSidebar />;
-    } else if (location.pathname.startsWith("/instructor")) {
+    } else if (userRole === "Instructor") {
       return <InstructorSidebar />;
+    } else if (userRole === "Student") {
+      return <StudentSidebar />;
     }
+    
+    // Default to student sidebar if no role is found
     return <StudentSidebar />;
   };
 

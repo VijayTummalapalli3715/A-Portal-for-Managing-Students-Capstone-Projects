@@ -65,7 +65,28 @@ const Login = () => {
       
     } catch (error) {
       console.error("Login error:", error);
-      toast.error(error.message || "Invalid credentials or server error");
+      if (error.message.includes("Access denied")) {
+        toast.error(error.message);
+      } else if (error.message.includes("auth/user-not-found")) {
+        toast.error("User not registered. Please sign up first.");
+      } else if (error.message.includes("auth/wrong-password") || error.message.includes("auth/invalid-credential")) {
+        toast.error("Invalid email or password. Please check your credentials.");
+      } else if (error.message.includes("auth/too-many-requests")) {
+        toast.error("Too many failed attempts. Please try again later.");
+      } else if (error.message.includes("auth/invalid-email")) {
+        toast.error("Invalid email format. Please check your email address.");
+      } else if (error.message.includes("auth/network-request-failed")) {
+        toast.error("Network error. Please check your internet connection.");
+      } else if (error.message.includes("User not found in database")) {
+        toast.error("User not registered. Please sign up first.");
+      } else if (error.message.includes("Failed to verify user role")) {
+        toast.error("Unable to verify your account. Please try again later.");
+      } else if (error.message.includes("auth/")) {
+        // Catch any other Firebase auth errors
+        toast.error("Authentication error. Please try again.");
+      } else {
+        toast.error(error.message || "An unexpected error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -161,6 +182,22 @@ const Login = () => {
           >
             {loading ? "Logging in..." : "Login"}
           </Button>
+          
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-600">
+              New to Capstone Portal?{" "}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/signup");
+                }}
+                className="text-orange-500 hover:text-orange-600 font-medium underline"
+              >
+                Create an account
+              </button>
+            </p>
+          </div>
         </motion.form>
       </main>
 

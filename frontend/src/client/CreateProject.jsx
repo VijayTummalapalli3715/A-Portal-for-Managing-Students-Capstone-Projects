@@ -1,9 +1,10 @@
 // ✅ Refactored CreateProject.jsx for fluid UX and cleaner positioning
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import TopbarWithSidebar from "@/pages/TopbarWithSidebar";
+import { toast } from "react-hot-toast";
 
 const CreateProject = () => {
   const navigate = useNavigate();
@@ -20,10 +21,49 @@ const CreateProject = () => {
     team_size: "",
     start_date: "",
     end_date: "",
+    selected_instructors: [],
   });
+
+  const [instructors, setInstructors] = useState([]);
+  const [loadingInstructors, setLoadingInstructors] = useState(true);
+
+  useEffect(() => {
+    const fetchInstructors = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:5006/api/users/instructors", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch instructors");
+        }
+
+        const data = await response.json();
+        setInstructors(data);
+      } catch (error) {
+        console.error("Error fetching instructors:", error);
+        toast.error("Failed to load instructors");
+      } finally {
+        setLoadingInstructors(false);
+      }
+    };
+
+    fetchInstructors();
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleInstructorChange = (e) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    setForm(prev => ({
+      ...prev,
+      selected_instructors: selectedOptions
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -228,6 +268,32 @@ const CreateProject = () => {
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Select Instructors (Optional)
+                </label>
+                <select
+                  multiple
+                  name="selected_instructors"
+                  value={form.selected_instructors}
+                  onChange={handleInstructorChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                >
+                  {loadingInstructors ? (
+                    <option>Loading instructors...</option>
+                  ) : (
+                    instructors.map((instructor) => (
+                      <option key={instructor.id} value={instructor.id}>
+                        {instructor.name} ({instructor.department || 'No department'})
+                      </option>
+                    ))
+                  )}
+                </select>
+                <p className="text-sm text-gray-500">
+                  Hold Ctrl/Cmd to select multiple instructors. If none selected, all instructors will be notified.
+                </p>
               </div>
             </CardContent>
           </Card>

@@ -20,24 +20,33 @@ const verifyTokenWithFirebase = async (idToken) => {
 };
 
 const protect = async (req, res, next) => {
+  console.log('Auth middleware called');
   const authHeader = req.headers.authorization;
+  console.log('Auth header:', authHeader);
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    console.log('No token provided or invalid format');
     return res.status(401).json({ message: "Unauthorized: No token provided" });
   }
 
   const token = authHeader.split(" ")[1];
+  console.log('Token extracted:', token.substring(0, 10) + '...');
 
   try {
+    console.log('Verifying token with Firebase...');
     const firebaseUser = await verifyTokenWithFirebase(token);
+    console.log('Firebase verification successful:', firebaseUser.email);
     const email = firebaseUser.email;
 
+    console.log('Querying database for user with email:', email);
     const [rows] = await db.execute("SELECT * FROM users WHERE email = ?", [email]);
 
     if (!rows.length) {
+      console.log('User not found in database');
       return res.status(403).json({ message: "Forbidden: User not found in database" });
     }
 
+    console.log('User found in database, role:', rows[0].role);
     req.user = {
       firebase: firebaseUser,
       db: rows[0],

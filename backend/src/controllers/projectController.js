@@ -87,15 +87,35 @@ const addProject = async (req, res) => {
 // Get a single project by ID
 const getProjectById = async (req, res) => {
   const projectId = req.params.id;
-  const clientId = req.user.db.id;
+  const userId = req.user.db.id;
+  const userRole = req.user.db.role;
+
+  console.log(`Fetching project with ID: ${projectId}`);
+  console.log(`User ID: ${userId}, User Role: ${userRole}`);
 
   try {
-    const [rows] = await db.execute("SELECT * FROM projects WHERE id = ? AND client_id = ?", [projectId, clientId]);
+    let query = "SELECT * FROM projects WHERE id = ?";
+    let params = [projectId];
 
+    // If user is a client, only show their own projects
+    if (userRole === 'Client') {
+      query += " AND client_id = ?";
+      params.push(userId);
+    }
+
+    console.log(`Query: ${query}`);
+    console.log(`Params: ${params}`);
+
+    const [rows] = await db.execute(query, params);
+    
+    console.log(`Projects found: ${rows.length}`);
+    
     if (rows.length === 0) {
+      console.log(`No project found with ID ${projectId}`);
       return res.status(404).json({ message: "Project not found" });
     }
 
+    console.log(`Returning project: ${JSON.stringify(rows[0])}`);
     res.json(rows[0]);
   } catch (error) {
     console.error("Error fetching project:", error);
