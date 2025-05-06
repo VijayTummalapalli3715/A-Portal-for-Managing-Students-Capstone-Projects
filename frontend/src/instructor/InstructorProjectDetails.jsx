@@ -22,74 +22,14 @@ const InstructorProjectDetails = () => {
       console.log('Token from localStorage:', token ? `${token.substring(0, 10)}...` : 'No token found');
       
       console.log(`Fetching project with ID: ${id}`);
-      
-      // Try all endpoints in sequence until one works
-      let response;
-      let errorMessages = [];
-      let requestSuccessful = false;
-      
-      // 1. Try the authenticated endpoint on main server
-      if (!requestSuccessful) {
-        try {
-          console.log('Attempting authenticated request on port 5006...');
-          response = await fetch(`http://localhost:5006/api/projects/${id}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          if (response.ok) {
-            console.log('Authenticated request successful');
-            requestSuccessful = true;
-          } else {
-            const error = await response.json();
-            errorMessages.push(`Auth endpoint error: ${error.message}`);
-          }
-        } catch (error) {
-          console.error('Error with authenticated request:', error);
-          errorMessages.push(`Auth endpoint exception: ${error.message}`);
-        }
-      }
-      
-      // 2. Try the public endpoint on main server
-      if (!requestSuccessful) {
-        try {
-          console.log('Trying public endpoint on port 5006...');
-          response = await fetch(`http://localhost:5006/api/projects/public/${id}`);
-          if (response.ok) {
-            console.log('Public endpoint successful');
-            requestSuccessful = true;
-          } else {
-            const error = await response.json();
-            errorMessages.push(`Public endpoint error: ${error.message}`);
-          }
-        } catch (error) {
-          console.error('Error with public endpoint:', error);
-          errorMessages.push(`Public endpoint exception: ${error.message}`);
-        }
-      }
-      
-      // 3. Try the temporary server
-      if (!requestSuccessful) {
-        try {
-          console.log('Trying temporary server on port 5008...');
-          response = await fetch(`http://localhost:5008/api/projects/public/${id}`);
-          if (response.ok) {
-            console.log('Temporary server successful');
-            requestSuccessful = true;
-          } else {
-            const error = await response.json();
-            errorMessages.push(`Temp server error: ${error.message}`);
-          }
-        } catch (error) {
-          console.error('Error with temporary server:', error);
-          errorMessages.push(`Temp server exception: ${error.message}`);
-        }
-      }
+      // Try the public endpoint
+      const response = await fetch(`http://localhost:5006/api/projects/public/${id}`);
 
-      // Check if any request succeeded
-      if (!requestSuccessful || !response || !response.ok) {
-        console.error('All requests failed:', errorMessages);
-        throw new Error('Failed to fetch project details: ' + errorMessages.join(', '));
+      console.log('Response status:', response.status);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        throw new Error('Failed to fetch project details');
       }
 
       const data = await response.json();
