@@ -76,13 +76,27 @@ const CreateProject = () => {
         return;
       }
 
+      // Map frontend fields to backend expected fields
+      const mappedForm = {
+        title: form.title,
+        description: form.description,
+        requirements: form.expected_outcomes, // or add a requirements field if needed
+        main_category: form.main_category,
+        sub_category: form.sub_categories, // or rename in the form
+        skills_required: form.skills_required,
+        resources: form.resources,
+        max_team_size: form.team_size ? Number(form.team_size) : null,
+        deadline: form.end_date ? form.end_date : null,
+        selected_instructors: form.selected_instructors,
+      };
+
       const response = await fetch("http://localhost:5006/api/projects", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(mappedForm),
       });
 
       if (!response.ok) {

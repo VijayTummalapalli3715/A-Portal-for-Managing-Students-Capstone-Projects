@@ -203,4 +203,17 @@ router.post("/students", protect, async (req, res) => {
   }
 });
 
+// Get all instructors
+router.get("/instructors", protect, async (req, res) => {
+  try {
+    const [instructors] = await db.execute(
+      "SELECT id, name, email, department FROM users WHERE role = 'Instructor'"
+    );
+    res.json(instructors);
+  } catch (error) {
+    console.error("Error fetching instructors:", error);
+    res.status(500).json({ message: "Failed to fetch instructors" });
+  }
+});
+
 module.exports = router;

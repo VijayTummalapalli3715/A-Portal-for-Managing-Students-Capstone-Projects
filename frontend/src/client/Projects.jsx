@@ -18,7 +18,13 @@ const Projects = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!response.ok) throw new Error("Failed to fetch projects");
-        const data = await response.json();
+        let data = await response.json();
+        // Map status/feedback for compatibility if needed
+        data = data.map((p) => ({
+          ...p,
+          status: p.status || (p.is_approved === true ? "approved" : p.is_approved === false ? "rejected" : "pending"),
+          feedback: p.feedback || p.rejection_feedback || ""
+        }));
         setProjects(data);
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -28,9 +34,10 @@ const Projects = () => {
     fetchProjects();
   }, []);
 
-  const approved = projects.filter((p) => p.is_approved === true);
-  const rejected = projects.filter((p) => p.is_approved === false);
-  const pending = projects.filter((p) => p.is_approved !== true && p.is_approved !== false);
+  // Use status field for filtering
+  const approved = projects.filter((p) => p.status === "approved");
+  const rejected = projects.filter((p) => p.status === "rejected");
+  const pending = projects.filter((p) => p.status === "pending");
 
   const StatusBadge = ({ status }) => {
     const colors = {
@@ -67,6 +74,13 @@ const Projects = () => {
               />
             </div>
             <p className="text-sm text-gray-700">{project.description}</p>
+            {/* Show feedback if project is rejected and feedback exists */}
+            {project.status === "rejected" && project.feedback && (
+              <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded">
+                <div className="font-semibold text-red-700">Rejection Feedback:</div>
+                <div className="text-red-800">{project.feedback}</div>
+              </div>
+            )}
             <div className="flex justify-end gap-3 pt-3">
               <Button variant="outline" size="sm" onClick={() => navigate(`/edit-project/${project.id}`)}>
                 <Pencil className="w-4 h-4 mr-1" /> Edit

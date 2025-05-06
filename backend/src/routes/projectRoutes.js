@@ -48,16 +48,20 @@ router.post("/", protect, async (req, res) => {
   try {
     const userId = req.user.db.id;
     const userRole = req.user.db.role;
+    // Accept both old and new field sets
     const {
       title,
       description,
       requirements,
       main_category,
       sub_category,
+      sub_categories,
       skills_required,
       resources,
       max_team_size,
+      team_size,
       deadline,
+      end_date,
       selected_instructors
     } = req.body;
 
@@ -69,60 +73,92 @@ router.post("/", protect, async (req, res) => {
       return res.status(400).json({ message: "Project title is required" });
     }
 
-    const [result] = await db.execute(
-      `INSERT INTO projects (
-        title, description, requirements, main_category, sub_category,
-        skills_required, resources, max_team_size, deadline, client_id, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        title,
-        description || null,
-        requirements || null,
-        main_category || null,
-        sub_category || null,
-        skills_required || null,
-        resources || null,
-        max_team_size || 4,
-        deadline || null,
-        userId,
-        status
-      ]
-    );
+    // Use fallback for fields if not provided
+    const finalRequirements = requirements || req.body.expected_outcomes || null;
+    const finalSubCategory = sub_category || sub_categories || null;
+    const finalMaxTeamSize = max_team_size || team_size || 4;
+    const finalDeadline = deadline || end_date || null;
 
-    // If project is created by client, create notification for instructors
-    if (userRole === 'Client') {
-      let instructors;
-      
-      if (selected_instructors && selected_instructors.length > 0) {
-        // Get selected instructors
-        [instructors] = await db.execute(
-          "SELECT id FROM users WHERE id IN (?)",
-          [selected_instructors]
-        );
-      } else {
-        // If no instructors selected, notify all instructors
-        [instructors] = await db.execute(
-          "SELECT id FROM users WHERE role = 'Instructor'"
-        );
-      }
-
-      // Create notifications for each instructor
-      for (const instructor of instructors) {
-        await db.execute(
-          `INSERT INTO notifications (
-            user_id, type, content, project_id, created_at
-          ) VALUES (?, 'project_approval', ?, ?, NOW())`,
-          [instructor.id, `New project "${title}" needs approval`, result.insertId]
-        );
-      }
-    }
-
-    res.status(201).json({
-      message: "Project created successfully",
-      projectId: result.insertId
+    // Debug log the values being inserted
+    console.log('Creating project with values:', {
+      title,
+      description: description || null,
+      requirements: finalRequirements,
+      main_category: main_category || null,
+      sub_category: finalSubCategory,
+      skills_required: skills_required || null,
+      resources: resources || null,
+      max_team_size: finalMaxTeamSize,
+      deadline: finalDeadline,
+      client_id: userId,
+      status
     });
+
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+      const [result] = await connection.execute(
+        `INSERT INTO projects (
+          title, description, requirements, main_category, sub_category,
+          skills_required, resources, max_team_size, deadline, client_id, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          title,
+          description || null,
+          finalRequirements,
+          main_category || null,
+          finalSubCategory,
+          skills_required || null,
+          resources || null,
+          finalMaxTeamSize,
+          finalDeadline,
+          userId,
+          status
+        ]
+      );
+
+      // If project is created by client, create notification for instructors
+      if (userRole === 'Client') {
+        let instructors;
+        if (selected_instructors && selected_instructors.length > 0) {
+          // Get selected instructors
+          [instructors] = await connection.execute(
+            "SELECT id FROM users WHERE id IN (?)",
+            [selected_instructors]
+          );
+        } else {
+          // If no instructors selected, notify all instructors
+          [instructors] = await connection.execute(
+            "SELECT id FROM users WHERE role = 'Instructor'"
+          );
+        }
+        // Create notifications for each instructor
+        for (const instructor of instructors) {
+          await connection.execute(
+            `INSERT INTO notifications (
+              user_id, type, content, project_id, created_at
+            ) VALUES (?, 'project_approval', ?, ?, NOW())`,
+            [instructor.id, `New project \"${title}\" needs approval`, result.insertId]
+          );
+        }
+      }
+
+      await connection.commit();
+      res.status(201).json({
+        message: "Project created successfully",
+        projectId: result.insertId
+      });
+    } catch (error) {
+      await connection.rollback();
+      console.error("Error creating project:", error && error.message ? error.message : error);
+      if (error && error.stack) console.error(error.stack);
+      res.status(500).json({ message: "Server error" });
+    } finally {
+      connection.release();
+    }
   } catch (error) {
-    console.error("Error creating project:", error);
+    console.error("Error creating project:", error && error.message ? error.message : error);
+    if (error && error.stack) console.error(error.stack);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -140,13 +176,14 @@ router.put("/:projectId/approval", protect, async (req, res) => {
     }
 
     // Update project status
-    await db.execute(
+    const connection = await db.getConnection();
+    await connection.execute(
       "UPDATE projects SET status = ?, feedback = ? WHERE id = ?",
       [status, feedback, projectId]
     );
 
     // Get project and client details
-    const [project] = await db.execute(
+    const [project] = await connection.execute(
       `SELECT p.*, u.id as client_id, u.name as client_name 
        FROM projects p 
        JOIN users u ON p.client_id = u.id 
@@ -156,7 +193,7 @@ router.put("/:projectId/approval", protect, async (req, res) => {
 
     // Create notification for the client
     if (project[0]) {
-      await db.execute(
+      await connection.execute(
         `INSERT INTO notifications (
           user_id, type, content, project_id, created_at
         ) VALUES (?, 'project_status', ?, ?, NOW())`,
@@ -168,8 +205,10 @@ router.put("/:projectId/approval", protect, async (req, res) => {
       );
     }
 
+    await connection.commit();
     res.json({ message: `Project ${status} successfully` });
   } catch (error) {
+    await connection.rollback();
     console.error("Error updating project approval:", error);
     res.status(500).json({ message: "Server error" });
   }

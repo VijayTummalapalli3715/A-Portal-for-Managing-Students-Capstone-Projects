@@ -11,6 +11,9 @@ const InstructorProjectDetails = () => {
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedback, setFeedback] = useState("");
 
   useEffect(() => {
     fetchProjectDetails();
@@ -40,6 +43,33 @@ const InstructorProjectDetails = () => {
       console.error('Error fetching project:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Approve or reject project
+  const handleApproval = async (status) => {
+    setActionLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:5006/api/projects/${id}/approval`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status, feedback: status === "rejected" ? feedback : "" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to update project status");
+      toast.success(data.message || `Project ${status} successfully`);
+      // Refresh project details
+      fetchProjectDetails();
+      setShowFeedback(false);
+      setFeedback("");
+    } catch (error) {
+      toast.error(error.message || "Failed to update project status");
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -154,6 +184,64 @@ const InstructorProjectDetails = () => {
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium text-gray-500">Resources</h3>
                   <p className="text-gray-700">{project.resources}</p>
+                </div>
+              )}
+
+              {/* Approval Actions for Pending Projects */}
+              {project.status === "pending" && (
+                <div className="space-y-3 pt-4">
+                  {!showFeedback ? (
+                    <div className="flex gap-3">
+                      <Button
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        disabled={actionLoading}
+                        onClick={() => handleApproval("approved")}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        className="bg-red-600 hover:bg-red-700 text-white"
+                        disabled={actionLoading}
+                        onClick={() => setShowFeedback(true)}
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <textarea
+                        className="w-full border border-gray-300 rounded-md p-2"
+                        rows={3}
+                        placeholder="Enter feedback for rejection (required)"
+                        value={feedback}
+                        onChange={e => setFeedback(e.target.value)}
+                        disabled={actionLoading}
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                          disabled={actionLoading || !feedback.trim()}
+                          onClick={() => handleApproval("rejected")}
+                        >
+                          Submit Rejection
+                        </Button>
+                        <Button
+                          variant="outline"
+                          disabled={actionLoading}
+                          onClick={() => { setShowFeedback(false); setFeedback(""); }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* Show feedback if project is rejected */}
+              {project.status === "rejected" && project.feedback && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
+                  <div className="font-semibold text-red-700">Rejection Feedback:</div>
+                  <div className="text-red-800">{project.feedback}</div>
                 </div>
               )}
             </CardContent>
