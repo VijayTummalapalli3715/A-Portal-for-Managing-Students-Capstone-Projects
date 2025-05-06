@@ -14,15 +14,8 @@ const ProvidePreferences = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const token = localStorage.getItem("token");
-
-        // Fetch student's current preferences
-        const preferencesRes = await fetch("http://localhost:5006/api/preferences/student", {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
 
         // Fetch all available projects
         const projectsRes = await fetch("http://localhost:5006/api/projects", {
@@ -32,22 +25,23 @@ const ProvidePreferences = () => {
           },
         });
 
-        if (!preferencesRes.ok || !projectsRes.ok) {
-          const preferencesMessage = await preferencesRes.json();
-          const projectsMessage = await projectsRes.json();
-          throw new Error(preferencesMessage.message || projectsMessage.message || "Failed to fetch data");
+        if (!projectsRes.ok) {
+          const projectsData = await projectsRes.json();
+          throw new Error(projectsData.message || projectsData.error || "Failed to fetch projects");
         }
 
-        const preferences = await preferencesRes.json();
         const projects = await projectsRes.json();
-
-        setPreferredProjects(preferences);
+        console.log('Fetched all projects:', projects);
+        
+        // Fetch preferences
+        await fetchPreferences();
         
         // Filter out already selected projects
-        const selectedProjectIds = preferences.map(p => p.id);
+        const selectedProjectIds = preferredProjects.map(p => p.id);
         const remainingProjects = projects.filter(p => !selectedProjectIds.includes(p.id));
         setAvailableProjects(remainingProjects);
       } catch (err) {
+        console.error('Error in initial data fetch:', err);
         setError(err.message || "Something went wrong");
       } finally {
         setLoading(false);
@@ -55,7 +49,7 @@ const ProvidePreferences = () => {
     };
 
     fetchData();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAddPreference = async (project) => {
     if (preferredProjects.length >= 3) {
@@ -64,7 +58,14 @@ const ProvidePreferences = () => {
     }
 
     try {
+      // Update UI first for better user experience
+      setPreferredProjects([...preferredProjects, {...project, preference_id: `temp_${Date.now()}`}]);
+      setAvailableProjects(availableProjects.filter(p => p.id !== project.id));
+      
+      // Then update the backend
       const token = localStorage.getItem("token");
+      console.log('Adding preference for project:', project.id);
+      
       const res = await fetch("http://localhost:5006/api/preferences", {
         method: "POST",
         headers: {
@@ -74,17 +75,47 @@ const ProvidePreferences = () => {
         body: JSON.stringify({ project_id: project.id }),
       });
 
+      console.log('Add preference response status:', res.status);
+      const responseData = await res.json();
+      console.log('Add preference response:', responseData);
+
       if (!res.ok) {
-        const { message } = await res.json();
-        throw new Error(message || "Failed to add preference");
+        // Revert UI changes if backend update fails
+        setPreferredProjects(preferredProjects);
+        setAvailableProjects([...availableProjects, project]);
+        throw new Error(responseData.message || responseData.error || "Failed to add preference");
       }
 
-      // Update state
-      setPreferredProjects([...preferredProjects, project]);
-      setAvailableProjects(availableProjects.filter(p => p.id !== project.id));
+      // If successful, fetch updated preferences to get the correct IDs
+      await fetchPreferences();
       toast.success(`Added ${project.title} to your preferences`);
     } catch (err) {
+      console.error('Error adding preference:', err);
       toast.error(err.message || "Something went wrong");
+    }
+  };
+  
+  // Separate function to fetch preferences
+  const fetchPreferences = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:5006/api/preferences/student", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const responseData = await res.json();
+        throw new Error(responseData.message || responseData.error || "Failed to fetch preferences");
+      }
+
+      const data = await res.json();
+      console.log('Fetched preferences:', data);
+      setPreferredProjects(data);
+    } catch (err) {
+      console.error('Error fetching preferences:', err);
     }
   };
 
@@ -136,9 +167,20 @@ const ProvidePreferences = () => {
 
   const handleSaveRankings = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const rankedProjectIds = preferredProjects.map((project) => project.id);
+      // Validate we have preferences to rank
+      if (preferredProjects.length === 0) {
+        toast.error("You don't have any preferences to rank");
+        return;
+      }
 
+      // Show optimistic UI update
+      toast.success("Saving your preference rankings...");
+      
+      // Get the project IDs in the current order
+      const rankedProjectIds = preferredProjects.map((project) => project.id);
+      
+      // Save to backend
+      const token = localStorage.getItem("token");
       const res = await fetch("http://localhost:5006/api/preferences/rank", {
         method: "POST",
         headers: {
@@ -148,14 +190,20 @@ const ProvidePreferences = () => {
         body: JSON.stringify({ projectRankings: rankedProjectIds }),
       });
 
+      const data = await res.json();
+      
       if (!res.ok) {
-        const { message } = await res.json();
-        throw new Error(message || "Failed to save rankings");
+        throw new Error(data.error || data.message || "Failed to save rankings");
       }
-
+      
+      // Also save to local storage as backup
+      localStorage.setItem('preferenceRanking', JSON.stringify(rankedProjectIds));
+      
+      console.log('Preferences ranked and saved:', { rankedProjectIds });
       toast.success("Project preferences ranked successfully!");
     } catch (err) {
-      toast.error(err.message || "Something went wrong");
+      console.error('Error saving rankings:', err);
+      toast.error(err.message || "Something went wrong while saving your preferences");
     }
   };
 

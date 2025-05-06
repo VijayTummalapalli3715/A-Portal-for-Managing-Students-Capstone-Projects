@@ -1,66 +1,74 @@
 const db = require("../db");
 
-// Add a new student preference
+// ✅ Add or update a student preference
 const addPreference = async (req, res) => {
+  const { project_id } = req.body;
+  const studentId = req.user.db.id;
+
+  // Validate input
+  if (!project_id) {
+    return res.status(400).json({ error: "Project ID is required." });
+  }
+
   try {
-    const { project_id } = req.body;
-    const student = req.user.db;
-
-    console.log("👤 Logged-in user:", student);
-
-    if (!project_id) {
-      return res.status(400).json({ error: "Project ID is required." });
-    }
-
-    if (!student || student.role !== "Student") {
-      return res.status(403).json({ error: "Only students can select preferences." });
-    }
-
-    const student_id = student.id;
-
-    // Check if preference already exists
-    const [existingPreference] = await db.execute(
-      "SELECT * FROM preferences WHERE student_id = ? AND project_id = ?",
-      [student_id, project_id]
+    // Check if the student already has preferences
+    const [existingPrefs] = await db.execute(
+      "SELECT * FROM student_preferences WHERE student_id = ?",
+      [studentId]
     );
 
-    if (existingPreference.length > 0) {
-      return res.status(400).json({ error: "You have already selected this project as a preference." });
+    if (existingPrefs.length > 0) {
+      // Student already has a preferences row
+      const studentPrefs = existingPrefs[0];
+      
+      // Check if this project is already in preferences
+      if (
+        studentPrefs.preference1_id === parseInt(project_id) ||
+        studentPrefs.preference2_id === parseInt(project_id) ||
+        studentPrefs.preference3_id === parseInt(project_id)
+      ) {
+        return res.status(400).json({ error: "You have already selected this project." });
+      }
+      
+      // Find the first empty preference slot
+      let updateField = null;
+      let updateQuery = "";
+      
+      if (studentPrefs.preference1_id === null) {
+        updateField = "preference1_id";
+      } else if (studentPrefs.preference2_id === null) {
+        updateField = "preference2_id";
+      } else if (studentPrefs.preference3_id === null) {
+        updateField = "preference3_id";
+      } else {
+        return res.status(400).json({ error: "You can only select up to 3 preferred projects." });
+      }
+      
+      // Update the preference
+      await db.execute(
+        `UPDATE student_preferences SET ${updateField} = ? WHERE student_id = ?`,
+        [project_id, studentId]
+      );
+    } else {
+      // Create a new preferences row for this student
+      await db.execute(
+        "INSERT INTO student_preferences (student_id, preference1_id) VALUES (?, ?)",
+        [studentId, project_id]
+      );
     }
-
-    // Limit to 3 preferences
-    const [rows] = await db.execute(
-      "SELECT COUNT(*) AS count FROM preferences WHERE student_id = ?",
-      [student_id]
-    );
-
-    if (rows[0].count >= 3) {
-      return res.status(400).json({ error: "You can only select up to 3 preferred projects." });
-    }
-
-    // Insert new preference
-    await db.execute(
-      "INSERT INTO preferences (student_id, project_id) VALUES (?, ?)",
-      [student_id, project_id]
-    );
 
     res.status(201).json({ message: "Preference added successfully!" });
   } catch (error) {
     console.error("Error adding preference:", error);
-    res.status(500).json({ error: "Server error." });
+    res.status(500).json({ error: "Server error.", details: error.message });
   }
 };
 
 // ✅ Get all preferences for Admin or Debugging
 const getPreferences = async (req, res) => {
   try {
-    const [rows] = await db.execute(
-      `SELECT p.id, u.name AS student_name, pr.title AS project_title
-       FROM preferences p
-       JOIN users u ON p.student_id = u.id
-       JOIN projects pr ON p.project_id = pr.id`
-    );
-    res.status(200).json(rows);
+    const [rows] = await db.execute("SELECT * FROM student_preferences");
+    res.json(rows);
   } catch (error) {
     console.error("Error fetching preferences:", error);
     res.status(500).json({ error: "Server error." });
@@ -72,36 +80,69 @@ const getStudentPreferences = async (req, res) => {
   const studentId = req.user.db.id;
 
   try {
+    // Get the student's preferences
     const [preferences] = await db.execute(
-      `
-      SELECT 
-        p.id AS preference_id,
-        pr.id AS id,
-        pr.title,
-        pr.description,
-        pr.skills_required,
-        pr.resources,
-        u.name AS client
-      FROM preferences p
-      JOIN projects pr ON p.project_id = pr.id
-      JOIN users u ON pr.client_id = u.id
-      WHERE p.student_id = ?
-      ORDER BY p.id
-      `,
+      "SELECT * FROM student_preferences WHERE student_id = ?",
       [studentId]
     );
 
-    res.json(preferences);
+    if (preferences.length === 0) {
+      return res.json([]);
+    }
+
+    const studentPrefs = preferences[0];
+    const projectIds = [
+      studentPrefs.preference1_id,
+      studentPrefs.preference2_id,
+      studentPrefs.preference3_id
+    ].filter(id => id !== null);
+
+    if (projectIds.length === 0) {
+      return res.json([]);
+    }
+
+    // Get the project details
+    const [projects] = await db.execute(
+      `
+      SELECT 
+        p.id,
+        p.title,
+        p.description,
+        p.skills_required,
+        p.resources,
+        u.name AS client
+      FROM projects p
+      JOIN users u ON p.client_id = u.id
+      WHERE p.id IN (${projectIds.join(",")})
+      `,
+    );
+
+    // Assign preference_id and order projects based on student preferences
+    const orderedProjects = projectIds.map(projectId => {
+      const project = projects.find(p => p.id === projectId);
+      if (project) {
+        // Add preference_id to match the frontend expectations
+        return {
+          ...project,
+          preference_id: studentPrefs.id
+        };
+      }
+      return null;
+    }).filter(p => p !== null);
+
+    res.json(orderedProjects);
   } catch (error) {
     console.error("Error fetching preferences:", error);
-    res.status(500).json({ error: "Server error." });
+    res.status(500).json({ error: "Server error.", details: error.message });
   }
 };
 
-// ✅ Rank student's preferred projects
+// ✅ Save student's preferred project rankings
 const rankPreferences = async (req, res) => {
   const studentId = req.user.db.id;
   const { projectRankings } = req.body;
+
+  console.log('Saving preferences ranking:', { studentId, projectRankings });
 
   try {
     // Validate input
@@ -109,132 +150,97 @@ const rankPreferences = async (req, res) => {
       return res.status(400).json({ error: "Invalid project rankings." });
     }
 
-    // Verify that the student has these projects in their preferences
-    const [validationRows] = await db.execute(
-      `SELECT project_id FROM preferences WHERE student_id = ? AND project_id IN (?)`,
-      [studentId, projectRankings]
-    );
-
-    if (validationRows.length !== projectRankings.length) {
-      return res.status(400).json({ error: "Invalid project preferences." });
+    if (projectRankings.length === 0) {
+      return res.status(400).json({ error: "No projects to rank." });
     }
 
-    // Update rankings for each project
-    const updatePromises = projectRankings.map(async (projectId, index) => {
-      await db.execute(
-        `UPDATE preferences SET ranking = ? WHERE student_id = ? AND project_id = ?`,
-        [index + 1, studentId, projectId]
-      );
-    });
+    if (projectRankings.length > 3) {
+      return res.status(400).json({ error: "You can only rank up to 3 projects." });
+    }
 
-    await Promise.all(updatePromises);
+    // Get the student's current preferences
+    const [existingPrefs] = await db.execute(
+      "SELECT * FROM student_preferences WHERE student_id = ?",
+      [studentId]
+    );
+
+    if (existingPrefs.length === 0) {
+      return res.status(404).json({ error: "No preferences found for this student." });
+    }
+
+    // Update the preferences with the new ranking
+    await db.execute(
+      `UPDATE student_preferences SET 
+        preference1_id = ?,
+        preference2_id = ?,
+        preference3_id = ?
+      WHERE student_id = ?`,
+      [
+        projectRankings[0] || null,
+        projectRankings[1] || null,
+        projectRankings[2] || null,
+        studentId
+      ]
+    );
 
     res.status(200).json({ message: "Project preferences ranked successfully!" });
   } catch (error) {
     console.error("Error ranking preferences:", error);
-    res.status(500).json({ error: "Server error." });
+    res.status(500).json({ error: "Server error.", details: error.message });
   }
 };
 
 // ✅ Remove a student's preference for a project
 const removePreference = async (req, res) => {
-  console.log('Remove Preference Request:', {
-    method: req.method,
-    studentId: req.user.db.id,
-    projectId: req.query.projectId,
-    headers: req.headers,
-    query: req.query,
-    body: req.body
-  });
-
   const studentId = req.user.db.id;
   const { projectId } = req.query;
 
   // Validate input
   if (!projectId) {
-    console.error('Remove Preference Error: No Project ID');
-    return res.status(400).json({ 
-      error: "Project ID is required.",
-      details: "Please provide a valid projectId in the query parameters"
-    });
+    return res.status(400).json({ error: "Project ID is required." });
   }
 
   try {
     // Validate project ID is a number
     const parsedProjectId = parseInt(projectId, 10);
     if (isNaN(parsedProjectId)) {
-      console.error('Remove Preference Error: Invalid Project ID', { projectId });
-      return res.status(400).json({ 
-        error: "Invalid Project ID",
-        details: "Project ID must be a valid number"
-      });
+      return res.status(400).json({ error: "Invalid Project ID" });
     }
 
-    // Check if the preference exists
-    const [existingPreference] = await db.execute(
-      "SELECT * FROM preferences WHERE student_id = ? AND project_id = ?",
-      [studentId, parsedProjectId]
+    // Get the student's preferences
+    const [preferences] = await db.execute(
+      "SELECT * FROM student_preferences WHERE student_id = ?",
+      [studentId]
     );
 
-    console.log('Existing Preference Check:', {
-      studentId,
-      projectId: parsedProjectId,
-      existingPreferenceCount: existingPreference.length
-    });
-
-    if (existingPreference.length === 0) {
-      console.warn('Remove Preference Warning: Preference not found', {
-        studentId,
-        projectId: parsedProjectId
-      });
-      return res.status(404).json({ 
-        error: "Preference not found.",
-        details: "No preference exists for this project and student"
-      });
+    if (preferences.length === 0) {
+      return res.status(404).json({ error: "No preferences found for this student." });
     }
 
-    // Remove the preference
-    const [deleteResult] = await db.execute(
-      "DELETE FROM preferences WHERE student_id = ? AND project_id = ?",
-      [studentId, parsedProjectId]
+    const studentPrefs = preferences[0];
+    let updateField = null;
+
+    // Find which preference slot contains this project
+    if (studentPrefs.preference1_id === parsedProjectId) {
+      updateField = "preference1_id";
+    } else if (studentPrefs.preference2_id === parsedProjectId) {
+      updateField = "preference2_id";
+    } else if (studentPrefs.preference3_id === parsedProjectId) {
+      updateField = "preference3_id";
+    } else {
+      return res.status(404).json({ error: "Project not found in student preferences." });
+    }
+
+    // Remove the preference by setting it to NULL
+    await db.execute(
+      `UPDATE student_preferences SET ${updateField} = NULL WHERE student_id = ?`,
+      [studentId]
     );
 
-    console.log('Delete Preference Result:', {
-      affectedRows: deleteResult.affectedRows,
-      studentId,
-      projectId: parsedProjectId
-    });
-
-    // Check if rows were actually deleted
-    if (deleteResult.affectedRows === 0) {
-      console.warn('Remove Preference Warning: No rows deleted', {
-        studentId,
-        projectId: parsedProjectId
-      });
-      return res.status(500).json({ 
-        error: "Failed to remove preference",
-        details: "Database operation did not affect any rows"
-      });
-    }
-
-    res.status(200).json({ 
-      message: "Preference removed successfully!",
-      deletedRows: deleteResult.affectedRows,
-      projectId: parsedProjectId
-    });
+    res.status(200).json({ message: "Preference removed successfully!" });
   } catch (error) {
-    console.error("Error removing preference:", {
-      message: error.message,
-      stack: error.stack,
-      studentId,
-      projectId
-    });
-    res.status(500).json({ 
-      error: "Server error", 
-      details: error.message,
-      studentId,
-      projectId
-    });
+    console.error("Error removing preference:", error);
+    res.status(500).json({ error: "Server error.", details: error.message });
   }
 };
 
