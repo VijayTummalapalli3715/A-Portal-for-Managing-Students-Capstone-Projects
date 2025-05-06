@@ -31,6 +31,9 @@ const clientRoutes = require("./routes/clientRoutes");
 // ✅ NEW: Import assigned project route for student
 const assignedRoutes = require("./routes/studentRoutes");
 
+// ✅ NEW: Import group formation routes
+const groupFormationRoutes = require("./routes/groupFormationRoutes");
+
 // Define routes
 app.use("/api/users", userRoutes);
 app.use("/api/projects", projectRoutes); // includes /recommended
@@ -40,6 +43,9 @@ app.use("/client", clientRoutes);
 
 // ✅ NEW: Student-specific APIs (assigned project, etc.)
 app.use("/api/student", assignedRoutes);
+
+// ✅ NEW: Group formation routes for automated group creation
+app.use("/api/group-formation", groupFormationRoutes);
 
 // Default route
 app.get("/", (req, res) => {

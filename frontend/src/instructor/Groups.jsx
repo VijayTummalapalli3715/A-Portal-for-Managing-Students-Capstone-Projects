@@ -57,13 +57,39 @@ const Groups = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-800">Project Groups</h1>
-          <Button
-            onClick={handleCreateGroup}
-            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Create Group
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => navigate('/instructor/groups/automated')}
+              className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
+            >
+              <Users className="w-4 h-4" />
+              Automate Groups
+            </Button>
+            <Button
+              onClick={handleCreateGroup}
+              className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Create Group
+            </Button>
+          </div>
+        </div>
+        
+        {/* Prominent Automated Group Formation Section */}
+        <div className="bg-purple-50 border-2 border-purple-500 rounded-lg p-4 mb-6 shadow-lg">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-bold text-purple-700">Automated Group Formation</h2>
+              <p className="text-gray-600">Create groups automatically based on student preferences</p>
+            </div>
+            <Button
+              onClick={() => navigate('/instructor/groups/automated')}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 text-lg flex items-center gap-2 shadow-md"
+            >
+              <Users className="w-5 h-5" />
+              Automate Now
+            </Button>
+          </div>
         </div>
 
         {groups.length === 0 ? (

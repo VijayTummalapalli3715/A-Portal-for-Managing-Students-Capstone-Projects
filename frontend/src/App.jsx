@@ -29,6 +29,7 @@ import InstructorCreateProject from "./instructor/InstructorCreateProject";
 import InstructorCreateAnnouncement from "./instructor/InstructorCreateAnnouncement";
 import InstructorScheduleEvaluation from "./instructor/InstructorScheduleEvaluation";
 import InstructorGroups from "./instructor/InstructorGroups";
+import AutomatedGroupFormation from "./instructor/AutomatedGroupFormation";
 import InstructorProfile from "./instructor/InstructorProfile";
 import StudentsList from "./instructor/StudentsList";
 import AddStudent from "./instructor/AddStudent";
@@ -61,6 +62,7 @@ function App() {
           <Route path="/instructor/projects/:id" element={<InstructorProjectDetails />} />
           <Route path="/instructor/groups" element={<Groups />} />
           <Route path="/instructor/groups/create" element={<CreateGroup />} />
+          <Route path="/instructor/groups/automated" element={<AutomatedGroupFormation />} />
           <Route path="/instructor/profile" element={<InstructorProfile />} />
           
           {/* Student Routes */}

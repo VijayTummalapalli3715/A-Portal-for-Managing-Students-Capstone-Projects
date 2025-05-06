@@ -92,9 +92,17 @@ const InstructorGroups = () => {
     <TopbarWithSidebar>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-800">Student Groups</h1>
-          <div className="flex gap-3">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Student Groups</h1>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => window.location.href = "/instructor/groups/create"}
+              className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Create Group
+            </Button>
             <Button
               onClick={handleGenerateGroups}
               disabled={generating}
@@ -102,6 +110,23 @@ const InstructorGroups = () => {
             >
               <RefreshCw className={`w-4 h-4 ${generating ? "animate-spin" : ""}`} />
               {generating ? "Generating..." : "Generate Groups"}
+            </Button>
+          </div>
+        </div>
+        
+        {/* Prominent Automated Formation Button */}
+        <div className="bg-purple-50 border-2 border-purple-500 rounded-lg p-4 mb-6 shadow-lg">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-bold text-purple-700">Automated Group Formation</h2>
+              <p className="text-gray-600">Create groups automatically based on student preferences</p>
+            </div>
+            <Button
+              onClick={() => window.location.href = "/instructor/groups/automated"}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 text-lg flex items-center gap-2 shadow-md"
+            >
+              <RefreshCw className="w-5 h-5" />
+              Automate Now
             </Button>
           </div>
         </div>
