@@ -27,8 +27,29 @@ app.get('/api/projects/:id', async (req, res) => {
   }
 });
 
+// Test endpoint to verify database connection
+app.get('/test-db', async (req, res) => {
+  try {
+    // Try to execute a simple query
+    const [result] = await db.execute('SELECT 1 as test');
+    console.log('Database connection successful:', result);
+    res.json({ 
+      status: 'success', 
+      message: 'Database connection successful',
+      result: result
+    });
+  } catch (error) {
+    console.error('Database connection error:', error);
+    res.status(500).json({ 
+      status: 'error', 
+      message: 'Database connection failed',
+      error: error.message 
+    });
+  }
+});
+
 // Start server
-const PORT = 5007;
+const PORT = 5006;  // This is the Express server port, not the database port
 app.listen(PORT, () => {
   console.log(`Test server running on port ${PORT}`);
 });

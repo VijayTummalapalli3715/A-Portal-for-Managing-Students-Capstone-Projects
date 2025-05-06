@@ -35,7 +35,7 @@ const Login = () => {
       const token = await userCredential.user.getIdToken();
       
       // 3. Verify with backend
-      const response = await fetch("http://localhost:5006/api/users/verify", {
+      const response = await fetch("http://localhost:5006/api/user/verify", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

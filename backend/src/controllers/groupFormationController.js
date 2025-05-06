@@ -4,7 +4,8 @@
  * Handles automatic group formation based on student preferences
  */
 
-const { formGroups, saveGroups, getStudentsWithPreferences, getAvailableProjects } = require('../utils/groupFormationAlgorithm');
+const { formGroups, saveGroups, getStudentsWithPreferences, getAvailableProjects, createGroups: createGroupsUtil } = require('../utils/groupFormationAlgorithm');
+const db = require('../db');
 
 /**
  * Get preview of how groups would be formed with a specific group size
@@ -94,83 +95,75 @@ const previewGroups = async (req, res) => {
  * @param {Object} res - Express response object
  */
 const createGroups = async (req, res) => {
+  const { groupSize } = req.body;
+
+  if (!groupSize || groupSize <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'Group size must be a positive number'
+    });
+  }
+
   try {
-    const { groupSize } = req.body;
-    
-    // Validate input
-    if (!groupSize || isNaN(parseInt(groupSize)) || parseInt(groupSize) < 1) {
-      return res.status(400).json({ 
-        error: "Invalid group size", 
-        message: "Group size must be a positive number" 
+    // Get all students with their preferences
+    const [students] = await db.execute(`
+      SELECT 
+        sp.student_id,
+        sp.preference_order,
+        sp.project_id,
+        p.title as project_title
+      FROM student_preferences sp
+      JOIN projects p ON sp.project_id = p.id
+      WHERE sp.assigned_project_id IS NULL
+      ORDER BY sp.student_id, sp.preference_order
+    `);
+
+    if (!students || students.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No students found with preferences'
       });
     }
-    
-    console.log(`Creating groups with size: ${groupSize}`);
-    
-    try {
-      // Form groups using the algorithm
-      const groups = await formGroups(parseInt(groupSize));
-      
-      if (!groups || groups.length === 0) {
-        return res.status(404).json({
-          error: "No groups formed",
-          message: "Could not form any groups with the current student preferences and projects"
-        });
-      }
-      
-      console.log(`Successfully formed ${groups.length} groups, saving to database...`);
-      
-      // Save groups to the database
-      const groupIds = await saveGroups(groups);
-      
-      // Calculate statistics
-      const totalStudents = groups.reduce((sum, group) => sum + (group.members ? group.members.length : 0), 0);
-      const stats = {
+
+    // Create groups using the algorithm
+    const groups = createGroupsUtil(students, groupSize);
+
+    // Save the groups to the database
+    await saveGroups(groups);
+
+    res.json({
+      success: true,
+      message: 'Groups created successfully',
+      data: {
         totalGroups: groups.length,
-        totalStudents: totalStudents,
-        averageGroupSize: totalStudents / groups.length,
-        firstChoiceAssignments: 0,
-        secondChoiceAssignments: 0,
-        thirdChoiceAssignments: 0,
-        noPreferenceAssignments: 0
-      };
-      
-      // Count preference assignments
-      for (const group of groups) {
-        if (group.members && Array.isArray(group.members)) {
-          for (const member of group.members) {
-            if (member.preference_score === 3) stats.firstChoiceAssignments++;
-            else if (member.preference_score === 2) stats.secondChoiceAssignments++;
-            else if (member.preference_score === 1) stats.thirdChoiceAssignments++;
-            else stats.noPreferenceAssignments++;
-          }
-        }
+        totalStudents: students.length
       }
-      
-      // Calculate satisfaction rate (weighted average of preference scores)
-      const totalPossibleScore = stats.totalStudents * 3; // If everyone got their first choice
-      const totalActualScore = groups.reduce((sum, group) => sum + (group.preference_score || 0), 0);
-      stats.satisfactionRate = totalPossibleScore > 0 ? totalActualScore / totalPossibleScore : 0;
-      
-      res.status(201).json({
-        success: true,
-        message: "Groups created successfully",
-        groupIds,
-        stats
-      });
-    } catch (algorithmError) {
-      console.error("Error in group formation algorithm or saving groups:", algorithmError);
-      return res.status(500).json({
-        error: "Algorithm error",
-        message: algorithmError.message,
-        stack: algorithmError.stack
+    });
+
+  } catch (error) {
+    console.error('Error in createGroups:', error);
+    
+    // Handle specific error cases
+    if (error.message === 'Groups have already been created') {
+      return res.status(409).json({
+        success: false,
+        message: 'Groups have already been created'
       });
     }
-  } catch (error) {
-    console.error("Error creating groups:", error);
-    res.status(500).json({ 
-      error: "Server error", 
-      message: error.message 
+
+    // Handle database errors
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({
+        success: false,
+        message: 'Duplicate entry found. Groups may already exist.'
+      });
+    }
+
+    // Handle other errors
+    res.status(500).json({
+      success: false,
+      message: 'Error creating groups',
+      error: error.message
     });
   }
 };

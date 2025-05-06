@@ -2,48 +2,123 @@ const db = require("../db");
 
 // Get the assigned project and teammates for the current student
 const getAssignedProject = async (req, res) => {
-  const studentId = req.user.db.id;
-
   try {
-    // Check if the student has an assigned_project in student_preferences
+    // Debug logging
+    console.log('User object:', req.user);
+    console.log('User DB object:', req.user?.db);
+    console.log('Student ID:', req.user?.db?.id);
+
+    // Ensure we have a valid student ID
+    if (!req.user || !req.user.db || !req.user.db.id) {
+      console.log('Authentication check failed:', {
+        hasUser: !!req.user,
+        hasDb: !!req.user?.db,
+        hasId: !!req.user?.db?.id
+      });
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated or invalid user data"
+      });
+    }
+
+    const studentId = req.user.db.id;
+    console.log('Using student ID:', studentId);
+
+    // First check if the student has any preferences
     const [preferences] = await db.execute(`
-      SELECT assigned_project
+      SELECT student_id, assigned_project_id
       FROM student_preferences
       WHERE student_id = ?
     `, [studentId]);
 
-    if (preferences.length === 0 || preferences[0].assigned_project === null) {
-      return res.status(404).json({ message: "No assigned project found. Your instructor is assigning projects or you have not yet been assigned. If you haven't provided your preferences, please do so." });
+    console.log('Student preferences:', preferences);
+
+    if (!preferences || preferences.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No preferences found for this student"
+      });
     }
 
-    const projectId = preferences[0].assigned_project;
-
-    // Fetch project details
-    const [projectRows] = await db.execute(`
-      SELECT id, title, client, description, skills_required AS skills, resources
-      FROM projects
-      WHERE id = ?
-    `, [projectId]);
-
-    if (projectRows.length === 0) {
-      return res.status(404).json({ message: "Assigned project not found" });
+    if (!preferences[0].assigned_project_id) {
+      return res.status(404).json({
+        success: false,
+        message: "No project has been assigned to you yet"
+      });
     }
 
-    const project = projectRows[0];
-
-    // Fetch team members (students with the same assigned_project in student_preferences)
-    const [team] = await db.execute(`
-      SELECT u.id, u.name, u.email
+    // Get the assigned project details
+    const [assignedProject] = await db.execute(`
+      SELECT 
+        p.id,
+        p.title,
+        p.description,
+        p.requirements,
+        p.skills_required,
+        p.resources,
+        p.main_category,
+        p.sub_category,
+        p.max_team_size,
+        p.deadline,
+        u.name as client_name,
+        g.id as group_id,
+        g.name as group_name
       FROM student_preferences sp
-      JOIN users u ON sp.student_id = u.id
-      WHERE sp.assigned_project = ?
-    `, [projectId]);
+      JOIN projects p ON sp.assigned_project_id = p.id
+      JOIN users u ON p.client_id = u.id
+      JOIN \`groups\` g ON g.project_id = p.id
+      JOIN group_members gm ON g.id = gm.group_id AND gm.student_id = ?
+      WHERE sp.student_id = ?
+    `, [studentId, studentId]);
 
-    res.status(200).json({ ...project, teamMembers: team });
+    console.log('Assigned project query result:', assignedProject);
+
+    if (!assignedProject || assignedProject.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No project has been assigned to you yet"
+      });
+    }
+
+    // Get other group members
+    const [groupMembers] = await db.execute(`
+      SELECT 
+        u.id,
+        u.name,
+        u.email,
+        gm.status as member_status
+      FROM group_members gm
+      JOIN users u ON gm.student_id = u.id
+      WHERE gm.group_id = ?
+    `, [assignedProject[0].group_id]);
+
+    console.log('Group members query result:', groupMembers);
+
+    res.json({
+      success: true,
+      project: assignedProject[0],
+      group: {
+        id: assignedProject[0].group_id,
+        name: assignedProject[0].group_name,
+        members: groupMembers
+      }
+    });
+
   } catch (error) {
     console.error("Error fetching assigned project:", error);
-    res.status(500).json({ message: "Server error." });
+    console.error("Error details:", {
+      message: error.message,
+      stack: error.stack,
+      code: error.code
+    });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching assigned project",
+      error: error.message
+    });
   }
 };
 
-module.exports = { getAssignedProject };
+module.exports = {
+  getAssignedProject
+};

@@ -45,33 +45,67 @@ router.post("/verify", protect, async (req, res) => {
   }
 });
 
-// Get current user profile
+// Get current user information
 router.get("/me", protect, async (req, res) => {
   try {
-    const userId = req.user.db.id;
-    const [user] = await db.execute(
-      "SELECT id, name, email, department, contact_number, preferences FROM users WHERE id = ?",
-      [userId]
-    );
+    console.log("Getting current user info");
+    console.log("User object from request:", req.user);
+    
+    // Get the user's database record
+    const [userRows] = await db.execute(`
+      SELECT 
+        id, 
+        name, 
+        email, 
+        role, 
+        firebase_uid,
+        created_at,
+        updated_at
+      FROM users 
+      WHERE id = ?
+    `, [req.user.db.id]);
 
-    if (!user[0]) {
-      return res.status(404).json({ message: "User not found" });
+    if (!userRows || userRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
     }
 
-    // Parse preferences if they exist
-    const userData = {
-      ...user[0],
-      preferences: user[0].preferences ? JSON.parse(user[0].preferences) : {
-        emailNotifications: true,
-        groupCreationAlerts: true,
-        evaluationReminders: true
-      }
-    };
+    const user = userRows[0];
+    console.log("User found:", user);
 
-    res.json(userData);
+    // If the user is a student, get their preferences
+    if (user.role === 'Student') {
+      const [preferences] = await db.execute(`
+        SELECT 
+          sp.id,
+          sp.project_id,
+          sp.preference_order,
+          sp.assigned_project_id,
+          p.title as project_title
+        FROM student_preferences sp
+        JOIN projects p ON sp.project_id = p.id
+        WHERE sp.student_id = ?
+        ORDER BY sp.preference_order
+      `, [user.id]);
+
+      console.log("Student preferences:", preferences);
+      user.preferences = preferences;
+    }
+
+    res.json({
+      success: true,
+      user
+    });
+
   } catch (error) {
-    console.error("Error fetching user profile:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error getting user info:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error getting user info",
+      error: error.message
+    });
   }
 });
 

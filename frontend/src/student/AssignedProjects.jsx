@@ -14,16 +14,22 @@ const AssignedProjects = () => {
       setError("");
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5006/api/student/assigned", {
+        const res = await fetch("http://localhost:5006/api/student/assigned-project", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) {
           const data = await res.json();
+          
           setError(data.message || "No assigned project found");
           setProject(null);
         } else {
           const data = await res.json();
-          setProject(data);
+          const project = data?.project;
+          const group = data?.group;
+          setProject(project);
+          console.log("data", data);
+          console.log("project", project);
+          console.log('DEBUG: Setting assigned project data:', data);
         }
       } catch (err) {
         setError("Failed to fetch assigned project");

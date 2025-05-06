@@ -14,12 +14,14 @@ const createPreferencesTable = async () => {
         preference1_id INT,
         preference2_id INT,
         preference3_id INT,
+        assigned_project_id INT,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (preference1_id) REFERENCES projects(id) ON DELETE SET NULL,
         FOREIGN KEY (preference2_id) REFERENCES projects(id) ON DELETE SET NULL,
         FOREIGN KEY (preference3_id) REFERENCES projects(id) ON DELETE SET NULL,
+        FOREIGN KEY (assigned_project_id) REFERENCES projects(id) ON DELETE SET NULL,
         CONSTRAINT unique_student UNIQUE (student_id)
       )
     `;

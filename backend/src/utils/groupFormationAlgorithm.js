@@ -316,63 +316,67 @@ const formGroups = async (groupSize) => {
  */
 const saveGroups = async (groups) => {
   try {
-    // Validate groups before saving
-    if (!groups || !Array.isArray(groups) || groups.length === 0) {
-      throw new Error("No valid groups to save");
-    }
+    // Get a connection from the pool
+    const connection = await db.getConnection();
     
-    // Validate each group has required properties
-    for (const group of groups) {
-      if (!group.project_id) {
-        console.error("Invalid group missing project_id:", group);
-        throw new Error("Invalid group data: missing project_id");
-      }
-      if (!group.members || !Array.isArray(group.members) || group.members.length === 0) {
-        console.error("Invalid group missing members:", group);
-        throw new Error("Invalid group data: missing members");
-      }
-    }
-    
-    const savedGroupIds = [];
-    
-    // Use a transaction to ensure all groups are saved or none
-    await db.beginTransaction();
-    
-    for (const group of groups) {
-      // Create the group
-      const projectTitle = group.project_title || "Unnamed Project";
-      const [groupResult] = await db.execute(
-        "INSERT INTO groups (project_id, name, status) VALUES (?, ?, ?)",
-        [group.project_id, `${projectTitle} Group`, "Forming"]
-      );
+    try {
+      // Start transaction
+      await connection.beginTransaction();
       
-      const groupId = groupResult.insertId;
-      savedGroupIds.push(groupId);
+      // Check if groups already exist
+      const [existingGroups] = await connection.execute(`
+        SELECT g.id, g.project_id, COUNT(gm.student_id) as member_count 
+        FROM \`groups\` g 
+        LEFT JOIN group_members gm ON g.id = gm.group_id 
+        GROUP BY g.id
+      `);
       
-      // Add members to the group
-      for (const member of group.members) {
-        if (!member.student_id) {
-          console.warn("Skipping invalid member without student_id:", member);
-          continue;
-        }
-        
-        await db.execute(
-          "INSERT INTO group_members (group_id, student_id, status) VALUES (?, ?, ?)",
-          [groupId, member.student_id, "Assigned"]
+      if (existingGroups.length > 0) {
+        throw new Error("Groups have already been created. Cannot create new groups.");
+      }
+      
+      const groupIds = [];
+      
+      // Create groups and add members
+      for (const group of groups) {
+        // Insert group
+        const [groupResult] = await connection.execute(
+          'INSERT INTO `groups` (project_id, name) VALUES (?, ?)',
+          [group.project_id, `${group.project_title} Group`]
         );
+        
+        const groupId = groupResult.insertId;
+        groupIds.push(groupId);
+        
+        // Add members to the group and update their assigned project
+        for (const member of group.members) {
+          // Add to group_members
+          await connection.execute(
+            'INSERT INTO group_members (group_id, student_id, status) VALUES (?, ?, ?)',
+            [groupId, member.student_id, 'Not Started']
+          );
+          
+          // Update student's assigned project
+          await connection.execute(
+            'UPDATE student_preferences SET assigned_project_id = ? WHERE student_id = ?',
+            [group.project_id, member.student_id]
+          );
+        }
       }
       
-      // Update project status
-      await db.execute(
-        "UPDATE projects SET status = ? WHERE id = ?",
-        ["Assigned", group.project_id]
-      );
+      // Commit transaction
+      await connection.commit();
+      return groupIds;
+      
+    } catch (error) {
+      // Rollback transaction on error
+      await connection.rollback();
+      throw error;
+    } finally {
+      // Release connection back to pool
+      connection.release();
     }
-    
-    await db.commit();
-    return savedGroupIds;
   } catch (error) {
-    await db.rollback();
     console.error("Error saving groups:", error);
     throw error;
   }

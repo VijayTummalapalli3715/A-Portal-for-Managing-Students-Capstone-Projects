@@ -23,26 +23,22 @@ const { createNotificationsTable } = require("./models/notifications");
 
 // Import routes
 const userRoutes = require("./routes/userRoutes");
+const studentRoutes = require("./routes/studentRoutes");
+const clientRoutes = require("./routes/clientRoutes");
 const projectRoutes = require("./routes/projectRoutes");
 const groupRoutes = require("./routes/groupRoutes");
 const preferenceRoutes = require("./routes/preferenceRoutes");
-const clientRoutes = require("./routes/clientRoutes");
-
-// ✅ NEW: Import assigned project route for student
-const assignedRoutes = require("./routes/studentRoutes");
 
 // ✅ NEW: Import group formation routes
 const groupFormationRoutes = require("./routes/groupFormationRoutes");
 
 // Define routes
-app.use("/api/users", userRoutes);
-app.use("/api/projects", projectRoutes); // includes /recommended
+app.use("/api/user", userRoutes);
+app.use("/api/student", studentRoutes);
+app.use("/api/client", clientRoutes);
+app.use("/api/projects", projectRoutes);
 app.use("/api/groups", groupRoutes);
 app.use("/api/preferences", preferenceRoutes);
-app.use("/client", clientRoutes);
-
-// ✅ NEW: Student-specific APIs (assigned project, etc.)
-app.use("/api/student", assignedRoutes);
 
 // ✅ NEW: Group formation routes for automated group creation
 app.use("/api/group-formation", groupFormationRoutes);
