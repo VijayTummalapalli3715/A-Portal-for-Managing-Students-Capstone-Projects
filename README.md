@@ -82,12 +82,12 @@ A full-stack web application designed for universities to streamline the end-to-
 
      - Backend:
 
-      npm start
+           npm start
 
      - Frontend:
 
-      cd ../frontend
-      npm run dev
+           cd ../frontend
+           npm run dev
 
 ## Usage
 
