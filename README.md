@@ -7,21 +7,18 @@ A full-stack web application designed for universities to streamline the end-to-
 
 **Student Portal** : Browse projects, set preferences, view assigned projects.
 
-** Client Dashboard ** : Create and manage project proposals, review student interest.
+**Client Dashboard** : Create and manage project proposals, review student interest.
 
-** Instructor Tools ** : Assign projects, manage evaluations, and oversee student progress.
+**Instructor Tools** : Assign projects, manage evaluations, and oversee student progress.
 
-** Authentication** : Secure login system using Firebase and JWT.
+**Authentication** : Secure login system using Firebase and JWT.
 
-** Admin Overview ** : View data across users, preferences, and project assignments.
+**Admin Overview** : View data across users, preferences, and project assignments.
 
-
-
----
 
 ## Tech Stack
 
-** Frontend **
+**Frontend**
 
 React.js
 
@@ -30,7 +27,7 @@ Tailwind CSS
 Vite
 
 
-** Backend ** 
+**Backend** 
 
 Node.js
 
@@ -39,19 +36,16 @@ Express.js
 MySQL
 
 
-** Authentication & Auth Management **
+**Authentication & Auth Management**
 
 Firebase Authentication (for secure sign-in)
 
 JWT (for protected routes)
 
 
-
----
-
 ## Installation
 
-** Prerequisites: **
+**Prerequisites:**
 
 Node.js and npm
 
@@ -60,7 +54,7 @@ MySQL
 Firebase project (for authentication)
 
 
-** Steps: **
+**Steps:**
 
 1. Clone the repository:
 
@@ -70,12 +64,12 @@ cd capstone-portal
 
 2. Install dependencies:
 
-* Frontend:
+*Frontend:
 
 cd frontend
 npm install
 
-* Backend:
+*Backend:
 
 cd ../backend
 npm install
@@ -92,20 +86,15 @@ Optionally configure Firebase settings in the frontend.
 
 4. Run the project:
 
-* Backend:
+*Backend:
 
 npm start
 
-* Frontend:
+*Frontend:
 
 cd ../frontend
 npm run dev
 
-
-
-
-
----
 
 ## Usage
 
@@ -117,11 +106,9 @@ npm run dev
 
 
 
----
-
 ## API Documentation
 
-** Authentication **
+**Authentication**
 
 * Register User
 
