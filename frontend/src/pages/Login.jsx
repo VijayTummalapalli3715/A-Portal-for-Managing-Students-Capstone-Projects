@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
 import { toast } from "sonner";
+import api from "@/lib/api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -35,21 +36,15 @@ const Login = () => {
       const token = await userCredential.user.getIdToken();
       
       // 3. Verify with backend
-      const response = await fetch("http://localhost:5006/api/user/verify", {
-        method: "POST",
+      const response = await api.post("/api/user/verify", {
+        role: formData.role
+      }, {
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ role: formData.role }),
+        }
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to verify user role");
-      }
-
-      const userData = await response.json();
+      const userData = response.data;
 
       // 4. Store necessary information
       localStorage.setItem("token", token);
@@ -65,30 +60,27 @@ const Login = () => {
       
     } catch (error) {
       console.error("Login error:", error);
-      if (error.message.includes("Access denied")) {
-        toast.error(error.message);
-      } else if (error.message.includes("auth/user-not-found")) {
-        toast.error("User not registered. Please sign up first.");
-      } else if (error.message.includes("auth/wrong-password") || error.message.includes("auth/invalid-credential")) {
-        toast.error("Invalid email or password. Please check your credentials.");
-      } else if (error.message.includes("auth/too-many-requests")) {
-        toast.error("Too many failed attempts. Please try again later.");
-      } else if (error.message.includes("auth/invalid-email")) {
-        toast.error("Invalid email format. Please check your email address.");
-      } else if (error.message.includes("auth/network-request-failed")) {
-        toast.error("Network error. Please check your internet connection.");
-      } else if (error.message.includes("User not found in database")) {
-        toast.error("User not registered. Please sign up first.");
-      } else if (error.message.includes("Failed to verify user role")) {
-        toast.error("Unable to verify your account. Please try again later.");
-      } else if (error.message.includes("auth/")) {
-        // Catch any other Firebase auth errors
-        toast.error("Authentication error. Please try again.");
-      } else {
-        toast.error(error.message || "An unexpected error occurred. Please try again.");
-      }
+      handleLoginError(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLoginError = (error) => {
+    if (error.response?.data?.message) {
+      toast.error(error.response.data.message);
+    } else if (error.message.includes("auth/user-not-found")) {
+      toast.error("User not registered. Please sign up first.");
+    } else if (error.message.includes("auth/wrong-password") || error.message.includes("auth/invalid-credential")) {
+      toast.error("Invalid email or password. Please check your credentials.");
+    } else if (error.message.includes("auth/too-many-requests")) {
+      toast.error("Too many failed attempts. Please try again later.");
+    } else if (error.message.includes("auth/invalid-email")) {
+      toast.error("Invalid email format. Please check your email address.");
+    } else if (error.message.includes("auth/network-request-failed")) {
+      toast.error("Network error. Please check your internet connection.");
+    } else {
+      toast.error("An unexpected error occurred. Please try again.");
     }
   };
 

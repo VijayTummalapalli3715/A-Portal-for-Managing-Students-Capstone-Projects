@@ -45,8 +45,11 @@
 
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5006";
+
 const api = axios.create({
-  baseURL: "http://localhost:5006",
+  baseURL: API_BASE_URL,
+  withCredentials: true,
 });
 
 api.interceptors.request.use(config => {
@@ -59,9 +62,21 @@ api.interceptors.request.use(config => {
   return config;
 });
 
-export const fetchClientDashboardData = async () => {
-  const response = await api.get("/api/projects/client"); // token handled by interceptor
+// Error handling interceptor
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      // Handle unauthorized access
+      localStorage.clear();
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
+export const fetchClientDashboardData = async () => {
+  const response = await api.get("/api/projects/client");
   return {
     projects: response.data,
     tasks: [],

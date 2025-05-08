@@ -11,8 +11,25 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Fix CORS for frontend (port 5173)
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+// CORS configuration
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:5173" // Development fallback
+].filter(Boolean); // Remove any undefined values
+
+app.use(cors({ 
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true 
+}));
 
 // Import database models
 const { createUserTable } = require("./models/userModel");
@@ -56,7 +73,10 @@ app.use((req, res, next) => {
 // Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ message: "Something went wrong!" });
+  res.status(err.status || 500).json({
+    message: err.message || "Something went wrong!",
+    error: process.env.NODE_ENV === 'development' ? err : {}
+  });
 });
 
 // Initialize database tables
@@ -83,4 +103,5 @@ initializeTables();
 const PORT = process.env.PORT || 5006;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
