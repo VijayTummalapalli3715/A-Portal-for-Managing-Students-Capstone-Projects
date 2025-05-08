@@ -3,11 +3,9 @@
 A full-stack web application designed for universities to streamline the end-to-end process of managing capstone projects. It enables clients to propose projects, students to select preferences, and instructors to assign projects—all in one centralized platform.
 
 
----
-
 ## Features
 
-** Student Portal ** : Browse projects, set preferences, view assigned projects.
+**Student Portal** : Browse projects, set preferences, view assigned projects.
 
 ** Client Dashboard ** : Create and manage project proposals, review student interest.
 
