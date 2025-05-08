@@ -1,227 +1,275 @@
-A Portal for Managing Student Capstone Projects
+
+# A Portal for Managing Student Capstone Projects
 
 A full-stack web application designed for universities to streamline the end-to-end process of managing capstone projects. It enables clients to propose projects, students to select preferences, and instructors to assign projects—all in one centralized platform.
 
-Features
 
-Student Portal: Browse projects, set preferences, view assigned projects.
+## Features
+**Student Portal:** Browse projects, set preferences, view assigned projects.
 
-Client Dashboard: Create and manage project proposals, review student interest.
+**Client Dashboard:** Create and manage project proposals, review student interest.
 
-Instructor Tools: Assign projects, manage evaluations, and oversee student progress.
+**Instructor Tools:** Assign projects, manage evaluations, and oversee student progress.
 
-Authentication: Secure login system using Firebase and JWT.
+**Authentication:** Secure login system using Firebase and JWT.
 
-Admin Overview: View data across users, preferences, and project assignments.
+**Admin Overview:** View data across users, preferences, and project assignments.
 
-Tech Stack
+## Tech Stack
+* Frontend:
 
-Frontend:
+  React.js
 
-React.js
+  Tailwind CSS
 
-Tailwind CSS
+  Vite
 
-Vite
+* Backend
 
-Backend
+  Node.js
 
-Node.js
+  Express.js
 
-Express.js
+  MySQL
 
-MySQL
+* Authentication & Auth Management
 
-Authentication & Auth Management
+  Firebase Authentication (for secure sign-in)
 
-Firebase Authentication (for secure sign-in)
+  JWT (for protected routes)
 
-JWT (for protected routes)
 
-Installation
 
-Prerequisites:
+## Installation
 
-Node.js and npm
+* Prerequisites:
 
-MySQL
+  Node.js and npm
 
-Firebase project (for authentication)
+  MySQL
 
-Steps:
+  Firebase project (for authentication)
 
-1.⁠ ⁠Clone the repository:
+* Steps:
 
-git clone https://github.com/your-username/capstone-portal.git
+  1.⁠ ⁠Clone the repository:
 
-cd capstone-portal
-2.⁠ ⁠Install dependencies:
+      git clone https://github.com/your-username/capstone-portal.git
 
-frontend
+      cd capstone-portal
+  
+  2.⁠ ⁠Install dependencies:
 
-cd frontend 
+    - frontend 
 
-npm install
-Backend:
+          cd frontend 
 
-cd ../backend
+          npm install
 
-npm install
-3.⁠ ⁠Configure environment variables:
+    - Backend:
 
-Create a .env file in the backend directory and add your database and Firebase credentials.
+          cd ../backend
 
-Optionally configure Firebase settings in the frontend.
+          npm install
 
-4.⁠ ⁠Run the project:
+  3.⁠ ⁠Configure environment variables:
 
-Backend:
-npm start
-Frontend:
-cd ../frontend
-npm run dev
-Usage
+    Create a .env file in the backend directory and add your  database and Firebase credentials.
 
-Students sign up, browse available projects, and select up to 3 preferences.
+     Optionally configure Firebase settings in the frontend.
+  
+  4.⁠ ⁠Run the project:
 
-Clients propose capstone projects and view student interest.
+     - Backend:
 
-Instructors assign projects and monitor team composition.
+      npm start
 
-API Documentation
+     - Frontend:
 
-Authentication
+      cd ../frontend
+      npm run dev
 
-Register User
+## Usage
 
-◦ Endpoint: POST /api/auth/register
+- Students sign up, browse available projects, and select up to 3 preferences.
 
-◦ Description: Registers a new user.
+- Clients propose capstone projects and view student interest.
 
-◦ Request Body:
+- Instructors assign projects and monitor team composition.
 
-  {
-    "name": "John Doe",
-    "email": "john.doe@example.com",
-    "password": "securePassword",
-    "role": "student"
-  }
-◦ Response:
 
-  {
-    "message": "User registered successfully",
-    "token": "jwt-token"
-  }
-Login User
+## API Documentation
 
-◦ Endpoint: POST /api/auth/login
+### Authentication
 
-◦ Description: Authenticates a user and returns a JWT token.
+- **Register User**
+   
+   ◦ **Endpoint:** POST /api/auth/register
 
-◦ Request Body:
+   ◦ **Description:** Registers a new user.
 
-{
-  "email": "john.doe@example.com",
-  "password": "securePassword"
-}
-◦ Response:
+   ◦ **Request Body:**
 
-{
-  "message": "Login successful",
-  "token": "jwt-token"
-}
-Projects
+        {
+          "name": "John Doe",
+          "email": "john.doe@example.com",
+          "password": "securePassword",
+          "role": "student"
+        }
+   ◦ **Response:**
+        
+        {
+          "message": "User registered successfully",
+          "token": "jwt-token"
+        }
 
-Get All Projects
+- **Login User**
 
-◦ Endpoint: POST /api/projects
+   ◦ **Endpoint:** POST /api/auth/login
 
-◦ Description: Retrieves a list of all available projects.
+   ◦ **Description:** Authenticates a user and returns a JWT token.
 
-◦ Headers:
+   ◦ **Request Body:**
 
-Authorization: Bearer jwt-token
-◦ Response:
+      {
+        "email": "john.doe@example.com",
+        "password": "securePassword"
+      }
 
-[
-  {
-    "id": 1,
-    "title": "AI Research",
-    "client": "Tech Innovations Ltd.",
-    "description": "Developing AI models for predictive analytics.",
-    "skills": ["Machine Learning", "Python", "Data Analysis"]
-  },
-  ...
-]
-Create New Project
+   ◦ **Response:**
 
-◦ Endpoint: POST /api/projects
+      {
+        "message": "Login successful",
+        "token": "jwt-token"
+      }
 
-◦ Description: Allows a client to propose a new project.
+### Projects
 
-◦ Headers:
+- **Get All Projects**
 
-Authorization: Bearer jwt-token
-◦ Request Body:
+   ◦ **Endpoint:** POST /api/projects
 
-{
-  "title": "AI Research",
-  "description": "Developing AI models for predictive analytics.",
-  "skills": ["Machine Learning", "Python", "Data Analysis"]
-}
-◦ Response:
+   ◦ **Description:** Retrieves a list of all available projects.
 
-{
-  "message": "Project created successfully",
-  "projectId": 1
-}
-Preferences
+   ◦ **Headers:** 
 
-Submit Preferences
+      Authorization: Bearer jwt-token
 
-◦ Endpoint: POST /api/preferences
+   ◦ **Response:**
 
-◦ Description: Allows a student to submit their project preferences.
+      [
+        {
+          "id": 1,
+          "title": "AI Research",
+          "client": "Tech Innovations Ltd.",
+          "description": "Developing AI models for predictive analytics.",
+          "skills": ["Machine Learning", "Python", "Data Analysis"]
+        },
+        ...
+      ]
 
-◦ Headers:
+- **Create New Project**
 
-Authorization: Bearer jwt-token
-◦ Request Body:
+   ◦ **Endpoint:** POST /api/projects
 
-{
-  "preferences": [1, 2, 3]
-}
-◦ Response:
+   ◦ **Description:** Allows a client to propose a new project.
 
-{
-  "message": "Preferences submitted successfully"
-}
-Assignments
+   ◦ **Headers:** 
 
-Assign Project to Student
+      Authorization: Bearer jwt-token
 
-◦ Endpoint: POST /api/assignments
+   ◦ **Request Body**:
 
-◦ Description: Allows an instructor to assign a project to a student.
+      {
+        "title": "AI Research",
+        "description": "Developing AI models for predictive analytics.",
+        "skills": ["Machine Learning", "Python", "Data Analysis"]
+      }
 
-◦ Headers:
+   ◦ **Response:**
 
-Authorization: Bearer jwt-token
-◦ Request Body:
+      {
+        "message": "Project created successfully",
+        "projectId": 1
+      }
 
-{
-  "studentId": 5,
-  "projectId": 1
-}
-◦ Response:
+### Preferences
 
-{
-  "message": "Project assigned successfully"
-}
-Contributors
+- **Submit Preferences**
+   
+   ◦ **Endpoint:** POST /api/preferences
 
-Sireesha Kuchimanchi
+   ◦ **Description:** Allows a student to submit their project preferences.
 
-Sree Rama Vijay Tummalapalli
+   ◦ **Headers:** 
 
-Gopi Krishna Nathani
+      Authorization: Bearer jwt-token
+
+   ◦ **Request Body:**
+
+      {
+        "preferences": [1, 2, 3]
+      }
+
+   ◦ **Response:**
+
+      {
+        "message": "Preferences submitted successfully"
+      }
+
+### Assignments
+
+- **Assign Project to Student**
+    
+   ◦ **Endpoint:** POST /api/assignments
+
+   ◦ **Description:** Allows an instructor to assign a project to a student.
+
+   ◦ **Headers:** 
+
+      Authorization: Bearer jwt-token
+
+   ◦ **Request Body:**
+
+      {
+        "studentId": 5,
+        "projectId": 1
+      }
+
+   ◦ **Response:**
+
+      {
+        "message": "Project assigned successfully"
+      }
+
+
+
+
+
+
+
+
+
+   
+
+   
+
+
+
+
+
+
+
+
+
+   
+
+
+
+## Contributors
+
+- Sireesha Kuchimanchi
+
+- Sree Rama Vijay Tummalapalli
+
+- Gopi Krishna Nathani
