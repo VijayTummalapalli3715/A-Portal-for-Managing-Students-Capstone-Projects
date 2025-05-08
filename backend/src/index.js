@@ -13,8 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // CORS configuration
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  "http://localhost:5173" // Development fallback
+  process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : "http://localhost:5173"
 ].filter(Boolean); // Remove any undefined values
 
 app.use(cors({ 
