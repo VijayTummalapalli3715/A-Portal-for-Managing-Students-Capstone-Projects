@@ -12,7 +12,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ Fix CORS for frontend (port 5173)
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ 
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.FRONTEND_URL 
+    : "http://localhost:5173", 
+  credentials: true 
+}));
 
 // Import database models
 const { createUserTable } = require("./models/userModel");
